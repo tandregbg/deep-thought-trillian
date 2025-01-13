@@ -1,0 +1,406 @@
+[2025-01-10 13:11:38] Transcraib agent script started with arguments: 
+[2025-01-10 13:11:38] Checking Transcraib agent status.
+[2025-01-10 13:11:39] Transcraib agent is running.
+[2025-01-10 13:11:42] Transcraib agent script started with arguments: --uninstall
+[2025-01-10 13:11:42] Uninstalling Transcraib agent.
+[2025-01-10 13:11:42] Transcraib agent uninstalled.
+[2025-01-10 13:11:47] Transcraib agent script started with arguments: --install
+[2025-01-10 13:11:47] Starting installation of Transcraib agent.
+[2025-01-10 13:11:47] Suggested voice memo directory found: /Users/tomasandre/Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings
+[2025-01-10 13:11:54] PDF directory does not exist: y
+[2025-01-10 13:12:02] Transcraib agent script started with arguments: 
+[2025-01-10 13:12:02] Checking Transcraib agent status.
+[2025-01-10 13:12:02] Transcraib agent is not running.
+[2025-01-10 13:16:09] Transcraib agent script started with arguments: 
+[2025-01-10 13:16:09] Checking Transcraib agent status.
+[2025-01-10 13:16:11] Transcraib agent script started with arguments: 
+[2025-01-10 13:16:11] Checking Transcraib agent status.
+[2025-01-10 13:16:13] Transcraib agent script started with arguments: --install
+[2025-01-10 13:16:13] Starting installation of Transcraib agent.
+[2025-01-11 01:02:31] Transcraib agent script started with arguments: 
+[2025-01-11 01:02:31] Checking Transcraib agent status.
+[2025-01-11 01:02:35] Transcraib agent script started with arguments: --install
+[2025-01-11 01:02:35] Starting installation of Transcraib agent.
+[2025-01-11 01:03:28] Transcraib agent script started with arguments: --install
+[2025-01-11 01:03:28] Starting installation of Transcraib agent.
+[2025-01-11 01:03:28] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:06:02] Transcraib agent script started with arguments: --install
+[2025-01-11 01:06:02] Starting installation of Transcraib agent.
+[2025-01-11 01:06:02] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:12:31] Transcraib agent script started with arguments: --install
+[2025-01-11 01:12:31] Starting installation of Transcraib agent.
+[2025-01-11 01:12:31] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:15:44] Transcraib agent script started with arguments: --install
+[2025-01-11 01:15:44] Starting installation of Transcraib agent.
+[2025-01-11 01:15:44] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:16:33] Transcraib agent script started with arguments: --install
+[2025-01-11 01:16:33] Starting installation of Transcraib agent.
+[2025-01-11 01:16:33] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:16:56] Created destination directory: Enter destination directory [/Users/tomasandre/Dropbox]: /Users/tomasandre/Dropbox
+[2025-01-11 01:20:46] Transcraib agent script started with arguments: --install
+[2025-01-11 01:20:46] Starting installation of Transcraib agent.
+[2025-01-11 01:20:46] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:21:57] Transcraib agent script started with arguments: --uninstall
+[2025-01-11 01:21:59] Uninstalling Transcraib agent.
+[2025-01-11 01:21:59] Transcraib agent uninstalled.
+[2025-01-11 01:22:03] Transcraib agent script started with arguments: --install
+[2025-01-11 01:22:03] Starting installation of Transcraib agent.
+[2025-01-11 01:22:03] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:22:05] Transcraib agent script started with arguments: --uninstall
+[2025-01-11 01:22:07] Uninstalling Transcraib agent.
+[2025-01-11 01:22:07] Transcraib agent uninstalled.
+[2025-01-11 01:23:24] Starting installation of Transcraib agent.
+[2025-01-11 01:23:24] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:26:21] Starting installation of Transcraib agent.
+[2025-01-11 01:26:21] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:27:27] Starting installation of Transcraib agent.
+[2025-01-11 01:27:27] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:27:53] Starting installation of Transcraib agent.
+[2025-01-11 01:27:53] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:28:40] Added custom source: Note: The directory must exist or you will be prompted to create it.
+Enter custom directory path [/Users/tomasandre]: /System/Volumes/Data/Users/tomasandre/Library/Mobile Documents/iCloud~com~novosoft~TurboScan/Documents (PDF-turboscan.pdf)
+[2025-01-11 01:28:44] Configuration saved to /Users/tomasandre/.transcraib_config
+[2025-01-11 01:28:44] Transcraib agent installed and launched.
+[2025-01-11 01:28:44] Checking Transcraib agent status.
+[2025-01-11 01:28:44] Starting monitoring with destination: Note: The directory must exist or you will be prompted to create it.
+[2025-01-11 01:28:44] Transcraib agent is running.
+[2025-01-11 01:29:20] Starting installation of Transcraib agent.
+[2025-01-11 01:29:20] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:29:34] Configuration saved to /Users/tomasandre/.transcraib_config
+[2025-01-11 01:29:34] Transcraib agent installed and launched.
+[2025-01-11 01:29:34] Checking Transcraib agent status.
+[2025-01-11 01:29:34] Starting monitoring with destination: 
+[2025-01-11 01:29:34] Transcraib agent is running.
+[2025-01-11 01:29:59] Starting installation of Transcraib agent.
+[2025-01-11 01:29:59] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:30:10] Configuration saved to /Users/tomasandre/.transcraib_config
+[2025-01-11 01:30:10] Transcraib agent installed and launched.
+[2025-01-11 01:30:10] Checking Transcraib agent status.
+[2025-01-11 01:30:10] Starting monitoring with destination: 
+[2025-01-11 01:30:10] Transcraib agent is running.
+[2025-01-11 01:30:47] Starting installation of Transcraib agent.
+[2025-01-11 01:30:47] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:31:02] Configuration saved to /Users/tomasandre/.transcraib_config
+[2025-01-11 01:31:02] Transcraib agent installed and launched.
+[2025-01-11 01:31:02] Checking Transcraib agent status.
+[2025-01-11 01:31:02] Starting monitoring with destination: 
+[2025-01-11 01:31:02] Transcraib agent is running.
+[2025-01-11 01:31:33] Starting installation of Transcraib agent.
+[2025-01-11 01:31:33] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:32:29] Starting installation of Transcraib agent.
+[2025-01-11 01:32:29] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:32:58] Starting installation of Transcraib agent.
+[2025-01-11 01:32:58] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:33:13] Configuration saved to /Users/tomasandre/.transcraib_config
+[2025-01-11 01:33:13] Transcraib agent installed and launched.
+[2025-01-11 01:33:13] Checking Transcraib agent status.
+[2025-01-11 01:33:13] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 01:33:13] Transcraib agent is running.
+[2025-01-11 01:33:43] Checking Transcraib agent status.
+[2025-01-11 01:33:43] Transcraib agent is running.
+[2025-01-11 01:33:58] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 01:34:39] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 01:34:39] Copied [voice_memos] 20241224 134340-03F1B6FD.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241224 134340-03F1B6FD.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20241223 115648-E3134C8C.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 115648-E3134C8C.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20250110 114856-66EBB847.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 114856-66EBB847.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20250108 140334-D5A8AC49.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250108 140334-D5A8AC49.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20241225 110924-581FDDBC.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241225 110924-581FDDBC.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20250110 170930-21C92FE1.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 170930-21C92FE1.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20250101 141425-23E683B4.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250101 141425-23E683B4.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20241224 192458-BB8573C0.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241224 192458-BB8573C0.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20241220 103211-D3A08CBC.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241220 103211-D3A08CBC.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20241217 143644-F4C09D6F.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241217 143644-F4C09D6F.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20241227 132547-1C78088F.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241227 132547-1C78088F.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20241221 104342-9737CC31.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241221 104342-9737CC31.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20241223 091303-4BB3A5A8.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 091303-4BB3A5A8.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20250110 115346-92AC785B.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 115346-92AC785B.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20251230 110203-2D288189.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20251230 110203-2D288189.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20241223 103850-A6632BE3.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 103850-A6632BE3.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20241224 112749-278F2B18.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241224 112749-278F2B18.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20241227 135740-BE0968D4.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241227 135740-BE0968D4.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20250109 164124-EE7B7A54.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250109 164124-EE7B7A54.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20241211 142904-A6155DAE.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241211 142904-A6155DAE.m4a
+[2025-01-11 01:34:39] Copied [voice_memos] 20241216 200405-802242C5.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241216 200405-802242C5.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20250109 122314-85720471.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250109 122314-85720471.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20241223 093747-39422025.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 093747-39422025.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20241220 150423-6AC26B12.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241220 150423-6AC26B12.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20251229 163037-50A14E4F.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20251229 163037-50A14E4F.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20241210 125200-1E890FEA.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241210 125200-1E890FEA.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20251229 110808-DFAA4889.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20251229 110808-DFAA4889.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20241223 085828-1995B9C4.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 085828-1995B9C4.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20250110 181906-0DF7F520.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 181906-0DF7F520.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20241224 172443-463A8637.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241224 172443-463A8637.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20241212 123126-EF4913B4.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241212 123126-EF4913B4.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20250110 110302-000FE577.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 110302-000FE577.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20241224 112653-8DF2382B.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241224 112653-8DF2382B.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20241220 123608-A5C990A9.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241220 123608-A5C990A9.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20241223 090852-1145E73D.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 090852-1145E73D.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20241227 123926-96A8785F.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241227 123926-96A8785F.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20241223 083902-4AD899A4.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 083902-4AD899A4.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20241212 114214-6F400210.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241212 114214-6F400210.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20250110 115058-924854A5.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 115058-924854A5.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20241224 173002-DA691759.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241224 173002-DA691759.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20241227 194408-147D9C7A.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241227 194408-147D9C7A.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20250109 131345-EF089569.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250109 131345-EF089569.m4a
+[2025-01-11 01:34:40] Copied [voice_memos] 20241211 115014-9C0F1D08.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241211 115014-9C0F1D08.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20241223 094411-9615D86A.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 094411-9615D86A.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20251229 160847-E9B4F3B1.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20251229 160847-E9B4F3B1.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20241220 125554-74F98CEF.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241220 125554-74F98CEF.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20241217 153226-8CE72FEA.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241217 153226-8CE72FEA.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20250110 125615-60B6831A.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 125615-60B6831A.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20250110 120012-6101F826.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 120012-6101F826.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20241212 211703-EDFFCD8C.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241212 211703-EDFFCD8C.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20250110 114612-A6EC9B3E.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 114612-A6EC9B3E.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20250108 145939-B9B36675.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250108 145939-B9B36675.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20250109 171506-CD18B887.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250109 171506-CD18B887.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20250109 144042-35152D98.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250109 144042-35152D98.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20241217 150027-7F37B29F.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241217 150027-7F37B29F.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20241224 173357-DA55DEE6.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241224 173357-DA55DEE6.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20241212 130656-A8A42858.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241212 130656-A8A42858.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20241211 100127-D33DB166.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241211 100127-D33DB166.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20250108 153936-9AD10012.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250108 153936-9AD10012.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20241218 152146-27744D45.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241218 152146-27744D45.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20241217 163119-222685C4.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241217 163119-222685C4.m4a
+[2025-01-11 01:34:41] Copied [voice_memos] 20250101 142501-405DFB24.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250101 142501-405DFB24.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20241220 155503-10839E5B.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241220 155503-10839E5B.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20241217 180340-C8DB3086.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241217 180340-C8DB3086.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20241223 085753-FE8E30B7.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 085753-FE8E30B7.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20241223 085215-0E3B08FA.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 085215-0E3B08FA.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20241224 164532-BF238FBE.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241224 164532-BF238FBE.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20251231 104158-1C7282B2.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20251231 104158-1C7282B2.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20250109 091509-AD6C1BEC.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250109 091509-AD6C1BEC.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20241220 120105-47DC492F.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241220 120105-47DC492F.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20241218 152838-4226C1E3.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241218 152838-4226C1E3.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20241211 093845-47AE764D.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241211 093845-47AE764D.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20250108 135546-553E2754.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250108 135546-553E2754.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20200718 091712-F8AE8D7B.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20200718 091712-F8AE8D7B.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20250109 100638-78C985A2.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250109 100638-78C985A2.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20241210 152946-DE0BD941.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241210 152946-DE0BD941.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20250110 113438-254193DA.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 113438-254193DA.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20241227 115955-85BD0661.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241227 115955-85BD0661.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20250101 141707-1E7F8F0F.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250101 141707-1E7F8F0F.m4a
+[2025-01-11 01:34:42] Copied [voice_memos] 20241227 135743-58D75CFF.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241227 135743-58D75CFF.m4a
+[2025-01-11 01:34:43] Copied [voice_memos] 20241226 223520-EBDCA4CA.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241226 223520-EBDCA4CA.m4a
+[2025-01-11 01:34:43] Copied [voice_memos] 20241212 083127-C12A6106.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241212 083127-C12A6106.m4a
+[2025-01-11 01:34:43] Copied [voice_memos] 20250109 081334-777C4C47.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250109 081334-777C4C47.m4a
+[2025-01-11 01:34:43] Copied [voice_memos] 20241223 095301-66F62466.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 095301-66F62466.m4a
+[2025-01-11 01:34:43] Copied [voice_memos] 20241220 193305-2FA7303E.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241220 193305-2FA7303E.m4a
+[2025-01-11 01:34:43] Copied [voice_memos] 20250106 120903-3613ECBC.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250106 120903-3613ECBC.m4a
+[2025-01-11 01:34:43] Copied [voice_memos] 20241220 103835-E7F90409.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241220 103835-E7F90409.m4a
+[2025-01-11 01:34:43] Copied [voice_memos] 20241212 205119-AF4E2468.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241212 205119-AF4E2468.m4a
+[2025-01-11 01:34:43] Copied [voice_memos] 20250110 184502-EFE093DC.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 184502-EFE093DC.m4a
+[2025-01-11 01:34:43] Copied [voice_memos] 20241211 113237-2E0C661C.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241211 113237-2E0C661C.m4a
+[2025-01-11 01:34:43] Copied [voice_memos] 20241227 122155-4ABBA6EE.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241227 122155-4ABBA6EE.m4a
+[2025-01-11 01:34:43] Copied [voice_memos] 20250108 170324-BE05FB81.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250108 170324-BE05FB81.m4a
+[2025-01-11 01:34:43] Copied [voice_memos] 20241223 104204-A4F95766.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 104204-A4F95766.m4a
+[2025-01-11 01:34:43] Copied [voice_memos] 20250109 130914-EF2FFF82.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250109 130914-EF2FFF82.m4a
+[2025-01-11 01:35:40] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 01:35:40] Initialized with existing files. Monitoring for new files...
+[2025-01-11 01:35:40] Copied [voice_memos] 20241224 134340-03F1B6FD.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241224 134340-03F1B6FD.m4a
+[2025-01-11 01:35:40] Copied [voice_memos] 20241223 115648-E3134C8C.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 115648-E3134C8C.m4a
+[2025-01-11 01:35:40] Copied [voice_memos] 20250110 114856-66EBB847.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 114856-66EBB847.m4a
+[2025-01-11 01:35:40] Copied [voice_memos] 20250108 140334-D5A8AC49.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250108 140334-D5A8AC49.m4a
+[2025-01-11 01:35:40] Copied [voice_memos] 20241225 110924-581FDDBC.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241225 110924-581FDDBC.m4a
+[2025-01-11 01:35:40] Copied [voice_memos] 20250110 170930-21C92FE1.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 170930-21C92FE1.m4a
+[2025-01-11 01:35:40] Copied [voice_memos] 20250101 141425-23E683B4.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250101 141425-23E683B4.m4a
+[2025-01-11 01:35:40] Copied [voice_memos] 20241224 192458-BB8573C0.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241224 192458-BB8573C0.m4a
+[2025-01-11 01:35:40] Copied [voice_memos] 20241220 103211-D3A08CBC.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241220 103211-D3A08CBC.m4a
+[2025-01-11 01:35:40] Copied [voice_memos] 20241217 143644-F4C09D6F.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241217 143644-F4C09D6F.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20241227 132547-1C78088F.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241227 132547-1C78088F.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20241221 104342-9737CC31.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241221 104342-9737CC31.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20241223 091303-4BB3A5A8.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 091303-4BB3A5A8.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20250110 115346-92AC785B.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 115346-92AC785B.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20251230 110203-2D288189.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20251230 110203-2D288189.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20241223 103850-A6632BE3.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 103850-A6632BE3.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20241224 112749-278F2B18.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241224 112749-278F2B18.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20241227 135740-BE0968D4.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241227 135740-BE0968D4.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20250109 164124-EE7B7A54.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250109 164124-EE7B7A54.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20241211 142904-A6155DAE.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241211 142904-A6155DAE.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20241216 200405-802242C5.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241216 200405-802242C5.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20250109 122314-85720471.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250109 122314-85720471.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20241223 093747-39422025.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 093747-39422025.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20241220 150423-6AC26B12.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241220 150423-6AC26B12.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20251229 163037-50A14E4F.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20251229 163037-50A14E4F.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20241210 125200-1E890FEA.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241210 125200-1E890FEA.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20251229 110808-DFAA4889.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20251229 110808-DFAA4889.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20241223 085828-1995B9C4.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 085828-1995B9C4.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20250110 181906-0DF7F520.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 181906-0DF7F520.m4a
+[2025-01-11 01:35:41] Copied [voice_memos] 20241224 172443-463A8637.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241224 172443-463A8637.m4a
+[2025-01-11 01:35:42] Copied [voice_memos] 20241212 123126-EF4913B4.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241212 123126-EF4913B4.m4a
+[2025-01-11 01:35:42] Copied [voice_memos] 20250110 110302-000FE577.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 110302-000FE577.m4a
+[2025-01-11 01:35:42] Copied [voice_memos] 20241224 112653-8DF2382B.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241224 112653-8DF2382B.m4a
+[2025-01-11 01:35:42] Copied [voice_memos] 20241220 123608-A5C990A9.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241220 123608-A5C990A9.m4a
+[2025-01-11 01:35:42] Copied [voice_memos] 20241223 090852-1145E73D.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 090852-1145E73D.m4a
+[2025-01-11 01:35:42] Copied [voice_memos] 20241227 123926-96A8785F.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241227 123926-96A8785F.m4a
+[2025-01-11 01:35:42] Copied [voice_memos] 20241223 083902-4AD899A4.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 083902-4AD899A4.m4a
+[2025-01-11 01:35:42] Copied [voice_memos] 20241212 114214-6F400210.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241212 114214-6F400210.m4a
+[2025-01-11 01:35:42] Copied [voice_memos] 20250110 115058-924854A5.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250110 115058-924854A5.m4a
+[2025-01-11 01:35:42] Copied [voice_memos] 20241224 173002-DA691759.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241224 173002-DA691759.m4a
+[2025-01-11 01:35:42] Copied [voice_memos] 20241227 194408-147D9C7A.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241227 194408-147D9C7A.m4a
+[2025-01-11 01:35:42] Copied [voice_memos] 20250109 131345-EF089569.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250109 131345-EF089569.m4a
+[2025-01-11 01:35:42] Copied [voice_memos] 20241211 115014-9C0F1D08.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241211 115014-9C0F1D08.m4a
+[2025-01-11 01:35:42] Copied [voice_memos] 20241223 094411-9615D86A.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20241223 094411-9615D86A.m4a
+[2025-01-11 01:35:42] Copied [voice_memos] 20251229 160847-E9B4F3B1.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20251229 160847-E9B4F3B1.m4a
+[2025-01-11 01:35:53] Uninstalling Transcraib agent.
+[2025-01-11 01:35:53] Transcraib agent uninstalled.
+[2025-01-11 01:36:10] No configuration found. Please run --install first.
+[2025-01-11 01:36:19] Starting installation of Transcraib agent.
+[2025-01-11 01:36:19] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 01:36:33] Configuration saved to /Users/tomasandre/.transcraib_config
+[2025-01-11 01:36:33] Transcraib agent installed and launched.
+[2025-01-11 01:36:34] Checking Transcraib agent status.
+[2025-01-11 01:36:34] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 01:36:34] Initialized with existing files. Monitoring for new files...
+[2025-01-11 01:36:34] Transcraib agent is running.
+[2025-01-11 01:36:36] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 01:36:36] Initialized with existing files. Monitoring for new files...
+[2025-01-11 01:36:54] Checking Transcraib agent status.
+[2025-01-11 01:36:54] Transcraib agent is running.
+[2025-01-11 01:36:58] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 01:36:58] Initialized with existing files. Monitoring for new files...
+[2025-01-11 01:37:19] Copied [voice_memos] 20250111 013714.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250111 013714.m4a
+[2025-01-11 01:41:06] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 01:41:06] Initialized with existing files. Monitoring for new files...
+[2025-01-11 01:46:57] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 01:46:57] Initialized with existing files. Monitoring for new files...
+[2025-01-11 01:48:56] Copied [voice_memos] 20250111 014853.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250111 014853.m4a
+[2025-01-11 01:51:20] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 01:51:20] Initialized with existing files. Monitoring for new files...
+[2025-01-11 01:51:33] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 01:51:33] Initialized with existing files. Monitoring for new files...
+[2025-01-11 01:51:38] Copied [voice_memos] 20250111 015136.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250111 015136.m4a
+[2025-01-11 01:54:09] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 01:54:54] Checking Transcraib agent status.
+[2025-01-11 01:54:54] Transcraib agent is running.
+[2025-01-11 09:55:41] Checking Transcraib agent status.
+[2025-01-11 09:55:41] Transcraib agent is running.
+[2025-01-11 09:56:42] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 09:57:04] Copied [voice_memos] 20250111 095649-41FC76B7.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250111 095649-41FC76B7.m4a
+[2025-01-11 10:00:03] Checking Transcraib agent status.
+[2025-01-11 10:00:03] Transcraib agent is running.
+[2025-01-11 10:00:10] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 10:00:32] Copied [voice_memos] 20250111 100017-F60ACBAD.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250111 100017-F60ACBAD.m4a
+[2025-01-11 10:00:37] Copied [voice_memos] 20250111 100017-F60ACBAD.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250111 100017-F60ACBAD.m4a
+[2025-01-11 10:24:15] Starting installation of Transcraib agent.
+[2025-01-11 10:24:15] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 10:27:49] Starting installation of Transcraib agent.
+[2025-01-11 10:27:49] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 10:30:16] Starting installation of Transcraib agent.
+[2025-01-11 10:30:16] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 10:31:19] Starting installation of Transcraib agent.
+[2025-01-11 10:31:19] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 10:41:22] Copied [voice_memos] 20250111 103153-F45B1F4F.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250111 103153-F45B1F4F.m4a
+[2025-01-11 10:44:17] Starting installation of Transcraib agent.
+[2025-01-11 10:44:17] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 10:46:37] Starting installation of Transcraib agent.
+[2025-01-11 10:46:37] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 10:48:47] Copied [voice_memos] 20250111 104514-6F3D12FF.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250111 104514-6F3D12FF.m4a
+[2025-01-11 10:52:43] Starting installation of Transcraib agent.
+[2025-01-11 10:52:43] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 10:53:23] Starting installation of Transcraib agent.
+[2025-01-11 10:53:23] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 10:54:30] Starting installation of Transcraib agent.
+[2025-01-11 10:54:30] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 10:55:00] Starting installation of Transcraib agent.
+[2025-01-11 10:55:00] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 10:55:42] Starting installation of Transcraib agent.
+[2025-01-11 10:55:42] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 10:58:22] Starting installation of Transcraib agent.
+[2025-01-11 10:58:22] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 11:00:37] Starting installation of Transcraib agent.
+[2025-01-11 11:00:37] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 11:02:28] Starting installation of Transcraib agent.
+[2025-01-11 11:02:28] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 11:11:40] Starting installation of Transcraib agent.
+[2025-01-11 11:11:40] Suggested destination directory found: /Users/tomasandre/Dropbox
+[2025-01-11 11:16:23] Uninstalling Transcraib agent.
+[2025-01-11 11:16:23] Transcraib agent uninstalled.
+[2025-01-11 11:16:27] Starting installation of Transcraib agent.
+[2025-01-11 11:17:01] Checking Transcraib agent status.
+[2025-01-11 11:26:55] Starting installation of Transcraib agent.
+[2025-01-11 11:27:06] Starting installation of Transcraib agent.
+[2025-01-11 11:27:34] Starting installation of Transcraib agent.
+[2025-01-11 11:27:34] Transcraib agent installed and launched.
+[2025-01-11 11:27:34] Checking Transcraib agent status.
+[2025-01-11 11:27:34] Starting background monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 11:27:34] Starting background monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 11:27:34] Transcraib agent is running.
+[2025-01-11 11:27:46] Checking Transcraib agent status.
+[2025-01-11 11:27:46] Transcraib agent is running.
+[2025-01-11 11:28:31] Copied [voice_memos] 20250111 112810-6EE67F58.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[voice_memos]_20250111 112810-6EE67F58.m4a
+[2025-01-11 12:00:24] Checking Transcraib agent status.
+[2025-01-11 12:00:25] Transcraib agent is running.
+[2025-01-11 12:31:10] Starting background monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 12:31:10] Starting background monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 12:36:41] Checking Transcraib agent status.
+[2025-01-11 12:36:41] Transcraib agent is running.
+[2025-01-11 12:37:01] Checking Transcraib agent status.
+[2025-01-11 12:37:01] Transcraib agent is running.
+[2025-01-11 12:37:07] Checking Transcraib agent status.
+[2025-01-11 12:37:07] Transcraib agent is running.
+[2025-01-11 12:37:33] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 12:37:53] Copied [VOICE] 20250111 123737-9E01D99C.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[VOICE]_20250111 123737-9E01D99C.m4a
+[2025-01-11 12:41:46] Copied [VOICE] 20250111 124128-6978DF7C.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[VOICE]_20250111 124128-6978DF7C.m4a
+[2025-01-11 12:50:08] Uninstalling Transcraib agent.
+[2025-01-11 12:50:08] Transcraib agent uninstalled.
+[2025-01-11 12:50:14] Starting installation of Transcraib agent.
+[2025-01-11 12:50:14] Transcraib agent installed and launched.
+[2025-01-11 12:50:14] Checking Transcraib agent status.
+[2025-01-11 12:50:14] Transcraib agent is running.
+[2025-01-11 12:50:14] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 12:50:14] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+
+=== Current Configuration ===
+
+Status: Running in foreground (--monitor mode)
+
+Destination Directory: /Users/tomasandre/Dropbox/tomas@tandre.se
+Contents (last 10 items):
+  [DIR] !pdf
+  [DIR] !transcription
+  [DIR] python
+  [DIR] !markdown
+  [DIR] __pycache__
+  [DIR] !temp
+  [DIR] !archive
+  ._.DS_Store
+  .DS_Store
+  Icon
+  a16z_our-team-tested-hundreds-of-ai-apps-in-2024-activity-7280026181440028672-eIOp.url
+  ... and 1 more items
+
+
+Monitored Source Directories:
+- [VOICE] /Users/tomasandre/Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings (.m4a) -        0 matching files
+- [PDF] /System/Volumes/Data/Users/tomasandre/Library/Mobile Documents/iCloud~com~novosoft~TurboScan/Documents (.pdf) -        0 matching files
+
+Initialized with existing files. Monitoring for new files...
+[2025-01-11 12:51:59] Copied [VOICE] 20250111 125146-6F62FB46.m4a to /Users/tomasandre/Dropbox/tomas@tandre.se/[VOICE]_20250111 125146-6F62FB46.m4a
+[2025-01-11 12:54:43] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+[2025-01-11 12:54:43] Starting monitoring with destination: /Users/tomasandre/Dropbox/tomas@tandre.se
+
+=== Current Configuration ===
+
+Status: Running in foreground (--monitor mode)
+
+Destination Directory: /Users/tomasandre/Dropbox/tomas@tandre.se
+Contents (last 10 items):
+  [DIR] !pdf
+  [DIR] !transcription
+  [DIR] python
+  [DIR] !markdown
+  [DIR] __pycache__
+  [DIR] !temp
+  [DIR] !archive
+  ._.DS_Store
+  .DS_Store
+  Icon
+  a16z_our-team-tested-hundreds-of-ai-apps-in-2024-activity-7280026181440028672-eIOp.url
+  ... and 1 more items
+
+
+Monitored Source Directories:
+- [VOICE] /Users/tomasandre/Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings (.m4a) -        0 matching files
+- [PDF] /System/Volumes/Data/Users/tomasandre/Library/Mobile Documents/iCloud~com~novosoft~TurboScan/Documents (.pdf) -        0 matching files
+
+Initialized with existing files. Monitoring for new files...
