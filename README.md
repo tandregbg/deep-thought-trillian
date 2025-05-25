@@ -18,32 +18,32 @@ A cross-platform file monitoring and organization system that automatically copi
 
 ```bash
 # Download and install
-curl -O https://raw.githubusercontent.com/your-repo/transcraib-agent/main/transcraib_agent.sh
-chmod +x transcraib_agent.sh
-./transcraib_agent.sh --install
+curl -O https://raw.githubusercontent.com/your-repo/transcraib-agent/main/transcraib-agent.sh
+chmod +x transcraib-agent.sh
+./transcraib-agent.sh --install
 ```
 
 ### Manual Setup
 
 1. **Download the script**
    ```bash
-   wget https://raw.githubusercontent.com/your-repo/transcraib-agent/main/transcraib_agent.sh
-   chmod +x transcraib_agent.sh
+   wget https://raw.githubusercontent.com/your-repo/transcraib-agent/main/transcraib-agent.sh
+   chmod +x transcraib-agent.sh
    ```
 
 2. **Install and configure**
    ```bash
-   ./transcraib_agent.sh --install
+   ./transcraib-agent.sh --install
    ```
 
 3. **Edit configuration** (optional)
    ```bash
-   nano ~/.transcraib/config.json
+   nano ~/.transcraib-agent/config.json
    ```
 
 4. **Start monitoring**
    ```bash
-   ./transcraib_agent.sh --status
+   ./transcraib-agent.sh --status
    ```
 
 ## Installation Requirements
@@ -62,7 +62,7 @@ chmod +x transcraib_agent.sh
 
 ## Configuration
 
-The configuration is stored in `~/.transcraib/config.json`:
+The configuration is stored in `~/.transcraib-agent/config.json`:
 
 ### Basic Structure
 
@@ -151,24 +151,24 @@ The configuration is stored in `~/.transcraib/config.json`:
 
 ### Primary Commands
 ```bash
-./transcraib_agent.sh --install      # Complete setup
-./transcraib_agent.sh --configure    # Interactive configuration
-./transcraib_agent.sh --status       # Show current status
-./transcraib_agent.sh --help         # Show help
+./transcraib-agent.sh --install      # Complete setup
+./transcraib-agent.sh --configure    # Interactive configuration
+./transcraib-agent.sh --status       # Show current status
+./transcraib-agent.sh --help         # Show help
 ```
 
 ### Service Management
 ```bash
-./transcraib_agent.sh --start        # Start service
-./transcraib_agent.sh --stop         # Stop service
-./transcraib_agent.sh --restart      # Restart service
-./transcraib_agent.sh --uninstall    # Remove service
+./transcraib-agent.sh --start        # Start service
+./transcraib-agent.sh --stop         # Stop service
+./transcraib-agent.sh --restart      # Restart service
+./transcraib-agent.sh --uninstall    # Remove service
 ```
 
 ### Testing/Debugging
 ```bash
-./transcraib_agent.sh --monitor      # Run in foreground (for testing)
-tail -f ~/.transcraib/transcraib_agent.log  # View logs
+./transcraib-agent.sh --monitor      # Run in foreground (for testing)
+tail -f ~/.transcraib-agent/transcraib-agent.log  # View logs
 ```
 
 ## macOS Permissions Setup
@@ -190,6 +190,22 @@ tail -f ~/.transcraib/transcraib_agent.log  # View logs
      - Downloads Folder
      - Any other directories you want to monitor
 
+### Adding Script to Full Disk Access
+
+To grant the script itself Full Disk Access permissions (required for LaunchAgent to access Voice Memos):
+
+1. **Open System Preferences** → **Security & Privacy** → **Privacy**
+2. **Click "Full Disk Access"** in the left sidebar
+3. **Click the lock** and enter your password
+4. **Click the "+" button**
+5. **Press Cmd+Shift+G** to open "Go to Folder"
+6. **Navigate to your script location**, e.g., `/Users/yourusername/Projects/transcraib-agent/transcraib-agent.sh`
+7. **Select the script** and click "Open"
+
+**Alternative**: Add `/bin/bash` instead:
+1. **Press Cmd+Shift+G** and type: `/bin/bash`
+2. **Select bash** and click "Open"
+
 ### App-Specific Directories
 
 Some apps store files in special locations that require Full Disk Access:
@@ -197,6 +213,48 @@ Some apps store files in special locations that require Full Disk Access:
 - **Voice Memos**: `~/Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings`
 - **TurboScan**: `~/Library/Mobile Documents/iCloud~com~novosoft~TurboScan/Documents`
 - **Other iCloud Apps**: `~/Library/Mobile Documents/iCloud~com~*`
+
+### Voice Memos LaunchAgent Limitation
+
+⚠️ **Important**: macOS LaunchAgents have security restrictions that can prevent access to Voice Memos, even with Full Disk Access granted.
+
+**Symptoms:**
+- `cp: Operation not permitted` errors in logs
+- Service restarting repeatedly
+- Files not being processed
+
+**Solutions:**
+
+#### Option 1: Foreground Mode (Recommended)
+```bash
+# Stop the background service
+./transcraib-agent.sh --uninstall
+
+# Use foreground mode when needed
+./transcraib-agent.sh --monitor
+```
+
+#### Option 2: Screen Background Mode
+Run monitoring in background using screen (bypasses LaunchAgent restrictions):
+```bash
+# Start in background with screen
+screen -dmS transcraib-agent ./transcraib-agent.sh --monitor
+
+# Check if running
+screen -list
+
+# Attach to session
+screen -r transcraib-agent
+
+# Detach from session (Ctrl+A, then D)
+```
+
+#### Option 3: Alternative Directories Only
+Configure LaunchAgent to monitor only accessible directories:
+- ✅ Downloads: `~/Downloads`
+- ✅ Desktop: `~/Desktop`
+- ✅ Documents: `~/Documents`
+- ❌ Voice Memos: Use foreground/screen mode
 
 ### Permission Troubleshooting
 
@@ -209,6 +267,54 @@ If you get "Operation not permitted" errors:
    ls "~/Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings"
    ```
 4. **Re-run installation** if needed
+5. **Consider screen-based background mode** for Voice Memos
+
+## Background Mode (Alternative to LaunchAgent)
+
+### Using Screen for Background Monitoring
+
+For directories with access restrictions (like Voice Memos), use screen instead of LaunchAgent:
+
+```bash
+# Start monitoring in background
+screen -dmS transcraib-agent ./transcraib-agent.sh --monitor
+
+# Check if running
+screen -list
+# Should show: 12345.transcraib-agent
+
+# View logs in real-time
+tail -f ~/.transcraib-agent/transcraib-agent.log
+
+# Stop monitoring
+screen -S transcraib-agent -X quit
+```
+
+### Screen Session Management
+
+```bash
+# Attach to running session
+screen -r transcraib-agent
+
+# Detach from session (keep it running)
+# Press Ctrl+A, then D
+
+# Kill session
+screen -S transcraib-agent -X quit
+
+# List all screen sessions
+screen -list
+```
+
+### Auto-start Screen Session
+
+Add to your shell profile (`.bashrc`, `.zshrc`, etc.):
+```bash
+# Auto-start transcraib-agent if not running
+if ! screen -list | grep -q "transcraib-agent"; then
+    screen -dmS transcraib-agent /path/to/transcraib-agent.sh --monitor
+fi
+```
 
 ## File Organization
 
@@ -242,14 +348,14 @@ All files are copied to a flat structure in the destination directory. The tag s
 ### macOS (LaunchAgent)
 
 The service runs automatically on login and creates:
-- Service file: `~/Library/LaunchAgents/com.transcraib.agent.plist`
+- Service file: `~/Library/LaunchAgents/com.transcraib-agent.plist`
 - Auto-start on login
 - Automatic restart if crashed
 
 ```bash
 # Manual service control
-launchctl load ~/Library/LaunchAgents/com.transcraib.agent.plist
-launchctl unload ~/Library/LaunchAgents/com.transcraib.agent.plist
+launchctl load ~/Library/LaunchAgents/com.transcraib-agent.plist
+launchctl unload ~/Library/LaunchAgents/com.transcraib-agent.plist
 ```
 
 ### Linux (systemd)
@@ -292,33 +398,37 @@ brew install fswatch
 #### "Operation not permitted" (macOS)
 **Solution**: Grant Full Disk Access to Terminal (see Permissions section)
 
+#### Voice Memos LaunchAgent Issues
+**Symptoms**: Service restarting, "Operation not permitted" errors
+**Solution**: Use screen-based background mode or foreground mode for Voice Memos
+
 #### Files not being detected
 **Checks**:
 1. Verify directory exists: `ls -la ~/path/to/directory`
-2. Check configuration: `cat ~/.transcraib/config.json`
+2. Check configuration: `cat ~/.transcraib-agent/config.json`
 3. Verify extensions match: files must have exact extension match
-4. Check logs: `tail -f ~/.transcraib/transcraib_agent.log`
+4. Check logs: `tail -f ~/.transcraib-agent/transcraib-agent.log`
 
 #### Service not starting
 **Checks**:
-1. Check service status: `./transcraib_agent.sh --status`
-2. Test manual run: `./transcraib_agent.sh --monitor`
-3. Check configuration: `./transcraib_agent.sh --configure`
+1. Check service status: `./transcraib-agent.sh --status`
+2. Test manual run: `./transcraib-agent.sh --monitor`
+3. Check configuration: `./transcraib-agent.sh --configure`
 4. Review logs for errors
 
 ### Log Analysis
 
-Logs are stored in `~/.transcraib/transcraib_agent.log`:
+Logs are stored in `~/.transcraib-agent/transcraib-agent.log`:
 
 ```bash
 # View recent logs
-tail -f ~/.transcraib/transcraib_agent.log
+tail -f ~/.transcraib-agent/transcraib-agent.log
 
 # Search for errors
-grep ERROR ~/.transcraib/transcraib_agent.log
+grep ERROR ~/.transcraib-agent/transcraib-agent.log
 
 # View startup messages
-grep "Starting Transcraib Agent" ~/.transcraib/transcraib_agent.log
+grep "Starting Transcraib Agent" ~/.transcraib-agent/transcraib-agent.log
 ```
 
 ### Configuration Validation
@@ -326,13 +436,13 @@ grep "Starting Transcraib Agent" ~/.transcraib/transcraib_agent.log
 Test your configuration:
 ```bash
 # Validate JSON syntax
-jq empty ~/.transcraib/config.json
+jq empty ~/.transcraib-agent/config.json
 
 # Show parsed configuration
-jq . ~/.transcraib/config.json
+jq . ~/.transcraib-agent/config.json
 
 # Test file access
-ls -la "$(jq -r '.destination' ~/.transcraib/config.json)"
+ls -la "$(jq -r '.destination' ~/.transcraib-agent/config.json)"
 ```
 
 ## Advanced Usage
@@ -424,25 +534,33 @@ The agent monitors:
 
 ```bash
 # Stop and remove service
-./transcraib_agent.sh --uninstall
+./transcraib-agent.sh --uninstall
 
 # Remove configuration and logs
-rm -rf ~/.transcraib
+rm -rf ~/.transcraib-agent
 
 # Remove script
-rm transcraib_agent.sh
+rm transcraib-agent.sh
 ```
 
 ### Keep Configuration
 
 ```bash
 # Stop service only
-./transcraib_agent.sh --uninstall
+./transcraib-agent.sh --uninstall
 
-# Keep ~/.transcraib directory for future use
+# Keep ~/.transcraib-agent directory for future use
 ```
 
 ## Changelog
+
+### Version 2.0.2 (2025-05-25)
+- **Fixed**: Logging bug that reported false "Failed to copy" errors when files were successfully processed
+- **Fixed**: LaunchAgent PATH environment to include Homebrew directories for fswatch access
+- **Added**: macOS Voice Memos LaunchAgent permission documentation and workarounds
+- **Added**: Screen-based background monitoring alternative for Voice Memos access
+- **Improved**: Full Disk Access setup instructions with Cmd+Shift+G navigation
+- **Improved**: Real-time monitoring now works correctly in both foreground and background modes
 
 ### Version 2.0.1 (2024-05-24)
 - **Fixed**: Bash compatibility issues with older bash versions (macOS 3.x)
@@ -484,7 +602,7 @@ MIT License - see LICENSE file for details.
 
 - **Issues**: Report bugs and request features via GitHub Issues
 - **Documentation**: This README covers most use cases
-- **Logs**: Check `~/.transcraib/transcraib_agent.log` for troubleshooting
+- **Logs**: Check `~/.transcraib-agent/transcraib-agent.log` for troubleshooting
 
 ---
 

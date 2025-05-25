@@ -1,20 +1,20 @@
 #!/bin/bash
 
-# Script: transcraib_agent.sh
+# Script: transcraib-agent.sh
 # Description: Advanced file monitoring and organization system
-# Version: 2.0.0
+# Version: 2.0.2
 # Supports: macOS and Ubuntu/Linux
 
 set -euo pipefail
 
 # Constants
-readonly SCRIPT_NAME="transcraib_agent"
-readonly VERSION="2.0.1"
-readonly CONFIG_DIR="$HOME/.transcraib"
+readonly SCRIPT_NAME="transcraib-agent"
+readonly VERSION="2.0.2"
+readonly CONFIG_DIR="$HOME/.transcraib-agent"
 readonly CONFIG_PATH="$CONFIG_DIR/config.json"
-readonly LOG_FILE="$CONFIG_DIR/transcraib_agent.log"
-readonly PID_FILE="$CONFIG_DIR/transcraib_agent.pid"
-readonly PROCESSED_DB="$CONFIG_DIR/processed_files"
+readonly LOG_FILE="$CONFIG_DIR/transcraib-agent.log"
+readonly PID_FILE="$CONFIG_DIR/transcraib-agent.pid"
+readonly PROCESSED_DB="$CONFIG_DIR/transcraib-agent-processed-files"
 
 # Detect operating system
 detect_os() {
@@ -36,7 +36,7 @@ case "$OS_TYPE" in
         readonly WATCH_CMD="fswatch"
         readonly SERVICE_TYPE="launchd"
         readonly SERVICE_DIR="$HOME/Library/LaunchAgents"
-        readonly SERVICE_FILE="com.transcraib.agent.plist"
+        readonly SERVICE_FILE="com.transcraib-agent.plist"
         ;;
     "linux")
         readonly STAT_CMD="stat -c %Y"
@@ -74,14 +74,17 @@ log() {
     # Write to log file
     echo "$timestamp [$level] $message" >> "$LOG_FILE"
     
-    # Print to console with colors
-    case "$level" in
-        "ERROR") echo -e "${RED}$timestamp [$level] $message${NC}" >&2 ;;
-        "WARN")  echo -e "${YELLOW}$timestamp [$level] $message${NC}" ;;
-        "INFO")  echo -e "${GREEN}$timestamp [$level] $message${NC}" ;;
-        "DEBUG") echo -e "${BLUE}$timestamp [$level] $message${NC}" ;;
-        *) echo "$timestamp [$level] $message" ;;
-    esac
+    # Only print to console if running interactively (not as a service)
+    # Check if we have a terminal and if parent is not launchd
+    if [[ -t 1 ]] && [[ "$PPID" != "1" ]] && [[ "$(ps -p $PPID -o comm= 2>/dev/null)" != "launchd" ]]; then
+        case "$level" in
+            "ERROR") echo -e "${RED}$timestamp [$level] $message${NC}" >&2 ;;
+            "WARN")  echo -e "${YELLOW}$timestamp [$level] $message${NC}" ;;
+            "INFO")  echo -e "${GREEN}$timestamp [$level] $message${NC}" ;;
+            "DEBUG") echo -e "${BLUE}$timestamp [$level] $message${NC}" ;;
+            *) echo "$timestamp [$level] $message" ;;
+        esac
+    fi
 }
 
 # Check if command exists
@@ -323,7 +326,7 @@ process_file() {
     
     # Copy file
     local dest_path="$destination/$dest_name"
-    if cp "$file" "$dest_path" 2>/dev/null; then
+    if cp "$file" "$dest_path"; then
         log "INFO" "Copied: $(basename "$file") -> $dest_name"
         
         # Update processed database
@@ -538,7 +541,8 @@ start_monitoring() {
             if command_exists fswatch; then
                 monitor_fswatch "$destination"
             else
-                log "WARN" "fswatch not available, falling back to polling"
+                log "WARN" "fswatch not found - install with 'brew install fswatch' for real-time monitoring"
+                log "INFO" "Currently using 5-second polling (fswatch provides instant file detection)"
                 monitor_polling "$destination"
             fi
             ;;
@@ -572,7 +576,7 @@ install_service() {
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.transcraib.agent</string>
+    <string>com.transcraib-agent</string>
     <key>ProgramArguments</key>
     <array>
         <string>$script_path</string>
@@ -586,6 +590,11 @@ install_service() {
     <string>$LOG_FILE</string>
     <key>StandardErrorPath</key>
     <string>$LOG_FILE</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
 </dict>
 </plist>
 EOF
