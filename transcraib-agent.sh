@@ -2,19 +2,23 @@
 
 # Script: transcraib-agent.sh
 # Description: Advanced file monitoring and organization system
-# Version: 2.0.2
-# Supports: macOS and Ubuntu/Linux
+# Version: 2.0.3
+# Supports: macOS and Ubuntu/Linux with LaunchAgent/systemd and cron variants
 
 set -euo pipefail
 
 # Constants
 readonly SCRIPT_NAME="transcraib-agent"
-readonly VERSION="2.0.2"
+readonly VERSION="2.0.3"
 readonly CONFIG_DIR="$HOME/.transcraib-agent"
 readonly CONFIG_PATH="$CONFIG_DIR/config.json"
 readonly LOG_FILE="$CONFIG_DIR/transcraib-agent.log"
 readonly PID_FILE="$CONFIG_DIR/transcraib-agent.pid"
 readonly PROCESSED_DB="$CONFIG_DIR/transcraib-agent-processed-files"
+readonly CRON_WRAPPER="$CONFIG_DIR/cron-monitor.sh"
+readonly CRON_LOG="$CONFIG_DIR/cron-monitor.log"
+readonly SCREEN_PID="$CONFIG_DIR/screen-session.pid"
+readonly CRON_STATUS="$CONFIG_DIR/cron-status"
 
 # Detect operating system
 detect_os() {
@@ -87,9 +91,33 @@ log() {
     fi
 }
 
+# Cron logging function
+cron_log() {
+    local level="$1"
+    shift
+    local message="$*"
+    local timestamp="[$(date +"%Y-%m-%d %H:%M:%S")]"
+    
+    # Create log directory if it doesn't exist
+    mkdir -p "$CONFIG_DIR"
+    
+    # Write to cron log file
+    echo "$timestamp [$level] $message" >> "$CRON_LOG"
+}
+
 # Check if command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
+}
+
+# Check if screen session exists
+screen_session_exists() {
+    screen -list 2>/dev/null | grep -q "transcraib-agent"
+}
+
+# Get screen session PID
+get_screen_session_pid() {
+    screen -list 2>/dev/null | grep "transcraib-agent" | cut -d. -f1 | tr -d '\t' 2>/dev/null || echo ""
 }
 
 # Check and install dependencies
@@ -99,6 +127,11 @@ check_dependencies() {
     # Check for jq (JSON processor)
     if ! command_exists jq; then
         missing_deps+=("jq")
+    fi
+    
+    # Check for screen (required for cron mode)
+    if ! command_exists screen; then
+        missing_deps+=("screen")
     fi
     
     # Check for OS-specific file watcher
@@ -123,7 +156,14 @@ check_dependencies() {
             "macos")
                 if command_exists brew; then
                     for dep in "${missing_deps[@]}"; do
-                        brew install "$dep"
+                        if [[ "$dep" == "screen" ]]; then
+                            # screen is usually pre-installed on macOS
+                            if ! command_exists screen; then
+                                brew install screen
+                            fi
+                        else
+                            brew install "$dep"
+                        fi
                     done
                 else
                     log "ERROR" "Homebrew not found. Please install: ${missing_deps[*]}"
@@ -252,14 +292,32 @@ configure_interactive() {
     mv "$temp_config" "$CONFIG_PATH"
     
     echo
-    echo "Step 2: Enable/Disable Watch Directories"
+    echo "Step 2: Installation Method"
+    echo "---------------------------"
+    echo "Choose installation method:"
+    echo "1. Standard (LaunchAgent/systemd) - Recommended for most directories"
+    echo "2. Cron + Screen - Required for Voice Memos and restricted directories"
+    echo
+    printf "Choose method [1]: "
+    read -r method_choice
+    method_choice="${method_choice:-1}"
+    
+    echo
+    echo "Step 3: Enable/Disable Watch Directories"
     echo "----------------------------------------"
     echo "Review the configuration file at: $CONFIG_PATH"
     echo "Set 'enabled': true for directories you want to monitor"
     echo
-    echo "✓ Configuration wizard complete!"
-    echo "✓ Edit $CONFIG_PATH to customize your setup"
-    echo "✓ Run '$0 --monitor' to start monitoring"
+    
+    if [[ "$method_choice" == "2" ]]; then
+        echo "✓ Configuration wizard complete!"
+        echo "✓ Edit $CONFIG_PATH to customize your setup"
+        echo "✓ Run '$0 --install-cron' to install with cron + screen method"
+    else
+        echo "✓ Configuration wizard complete!"
+        echo "✓ Edit $CONFIG_PATH to customize your setup"
+        echo "✓ Run '$0 --install' to install with standard method"
+    fi
 }
 
 # Validate configuration
@@ -292,6 +350,11 @@ validate_config() {
     fi
     
     return 0
+}
+
+# Check if Voice Memos directory is enabled
+voice_memos_enabled() {
+    jq -r '.watch_directories[] | select(.name == "voice_memos") | .enabled' "$CONFIG_PATH" 2>/dev/null | grep -q "true"
 }
 
 # Process a single file
@@ -561,6 +624,123 @@ start_monitoring() {
     esac
 }
 
+# Create cron wrapper script
+create_cron_wrapper() {
+    local script_path
+    script_path=$(realpath "$0")
+    
+    cat > "$CRON_WRAPPER" << EOF
+#!/bin/bash
+
+# Cron wrapper for Transcraib Agent
+# This script ensures the screen session is always running
+
+SCRIPT_PATH="$script_path"
+CONFIG_DIR="$CONFIG_DIR"
+CRON_LOG="$CRON_LOG"
+SCREEN_PID="$SCREEN_PID"
+CRON_STATUS="$CRON_STATUS"
+
+# Function to log messages
+cron_log() {
+    local level="\$1"
+    shift
+    local message="\$*"
+    local timestamp="[\$(date +"%Y-%m-%d %H:%M:%S")]"
+    echo "\$timestamp [\$level] \$message" >> "\$CRON_LOG"
+}
+
+# Check if screen session exists
+screen_session_exists() {
+    screen -list 2>/dev/null | grep -q "transcraib-agent"
+}
+
+# Get screen session PID
+get_screen_session_pid() {
+    screen -list 2>/dev/null | grep "transcraib-agent" | cut -d. -f1 | tr -d '\t' 2>/dev/null || echo ""
+}
+
+# Update status file
+update_status() {
+    local status="\$1"
+    echo "status=\$status" > "\$CRON_STATUS"
+    echo "last_check=\$(date +%s)" >> "\$CRON_STATUS"
+    if screen_session_exists; then
+        echo "screen_pid=\$(get_screen_session_pid)" >> "\$CRON_STATUS"
+    fi
+}
+
+# Main logic
+if ! screen_session_exists; then
+    cron_log "INFO" "Screen session not found, starting new session"
+    screen -dmS transcraib-agent "\$SCRIPT_PATH" --monitor
+    sleep 2
+    
+    if screen_session_exists; then
+        local pid=\$(get_screen_session_pid)
+        echo "\$pid" > "\$SCREEN_PID"
+        cron_log "INFO" "Started screen session with PID: \$pid"
+        update_status "running"
+    else
+        cron_log "ERROR" "Failed to start screen session"
+        update_status "failed"
+    fi
+else
+    local pid=\$(get_screen_session_pid)
+    if [[ -n "\$pid" ]]; then
+        echo "\$pid" > "\$SCREEN_PID"
+        update_status "running"
+    fi
+fi
+EOF
+    
+    chmod +x "$CRON_WRAPPER"
+    log "INFO" "Created cron wrapper script: $CRON_WRAPPER"
+}
+
+# Install cron job
+install_cron_job() {
+    local current_crontab
+    local new_cron_line="* * * * * $CRON_WRAPPER >/dev/null 2>&1"
+    
+    # Get current crontab (ignore errors if no crontab exists)
+    current_crontab=$(crontab -l 2>/dev/null || echo "")
+    
+    # Check if our cron job already exists
+    if echo "$current_crontab" | grep -q "$CRON_WRAPPER"; then
+        log "INFO" "Cron job already exists"
+        return 0
+    fi
+    
+    # Add our cron job
+    {
+        echo "$current_crontab"
+        echo "$new_cron_line"
+    } | crontab -
+    
+    log "INFO" "Installed cron job for Transcraib Agent"
+}
+
+# Remove cron job
+remove_cron_job() {
+    local current_crontab
+    local temp_crontab
+    
+    # Get current crontab (ignore errors if no crontab exists)
+    current_crontab=$(crontab -l 2>/dev/null || echo "")
+    
+    # Remove our cron job
+    temp_crontab=$(echo "$current_crontab" | grep -v "$CRON_WRAPPER" || true)
+    
+    if [[ -n "$temp_crontab" ]]; then
+        echo "$temp_crontab" | crontab -
+    else
+        crontab -r 2>/dev/null || true
+    fi
+    
+    log "INFO" "Removed cron job for Transcraib Agent"
+}
+
 # Install as system service
 install_service() {
     local script_path
@@ -639,6 +819,79 @@ EOF
     esac
 }
 
+# Install cron-based monitoring
+install_cron_service() {
+    log "INFO" "Installing cron-based monitoring with screen..."
+    
+    # Check dependencies
+    check_dependencies
+    
+    # Generate configuration if it doesn't exist
+    if [[ ! -f "$CONFIG_PATH" ]]; then
+        generate_config
+        log "INFO" "Generated default configuration"
+        log "INFO" "Edit $CONFIG_PATH to customize your setup"
+    fi
+    
+    # Create cron wrapper script
+    create_cron_wrapper
+    
+    # Install cron job
+    install_cron_job
+    
+    # Initialize status file
+    echo "status=installed" > "$CRON_STATUS"
+    echo "last_check=$(date +%s)" >> "$CRON_STATUS"
+    echo "install_time=$(date)" >> "$CRON_STATUS"
+    
+    log "INFO" "Cron-based monitoring installed successfully"
+    
+    echo
+    echo "Cron Installation Complete!"
+    echo "=========================="
+    echo
+    echo "Installation method: Cron + Screen (bypasses LaunchAgent restrictions)"
+    echo "Configuration: $CONFIG_PATH"
+    echo "Logs: $LOG_FILE"
+    echo "Cron logs: $CRON_LOG"
+    echo "Status: $CRON_STATUS"
+    echo
+    echo "✓ Cron job checks every minute for screen session"
+    echo "✓ Screen session runs the monitoring in background"
+    echo "✓ Bypasses macOS security restrictions for Voice Memos"
+    echo
+    echo "Next steps:"
+    echo "1. Edit configuration: $CONFIG_PATH"
+    echo "2. Enable directories you want to monitor"
+    echo "3. Check status: $0 --status-cron"
+    echo "4. View logs: tail -f $LOG_FILE"
+    echo "5. View cron logs: tail -f $CRON_LOG"
+}
+
+# Uninstall
+uninstall_cron_service() {
+    log "INFO" "Uninstalling cron-based monitoring..."
+    
+    # Stop screen session
+    if screen_session_exists; then
+        local pid=$(get_screen_session_pid)
+        if [[ -n "$pid" ]]; then
+            screen -S transcraib-agent -X quit
+            log "INFO" "Stopped screen session (PID: $pid)"
+        fi
+    fi
+    
+    # Remove cron job
+    remove_cron_job
+    
+    # Remove cron files
+    [[ -f "$CRON_WRAPPER" ]] && rm -f "$CRON_WRAPPER"
+    [[ -f "$SCREEN_PID" ]] && rm -f "$SCREEN_PID"
+    [[ -f "$CRON_STATUS" ]] && rm -f "$CRON_STATUS"
+    
+    log "INFO" "Cron-based monitoring uninstalled successfully"
+}
+
 # Uninstall service
 uninstall_service() {
     case "$SERVICE_TYPE" in
@@ -663,6 +916,63 @@ uninstall_service() {
     
     # Clean up PID file
     [[ -f "$PID_FILE" ]] && rm -f "$PID_FILE"
+}
+
+# Show cron status
+show_cron_status() {
+    echo "Transcraib Agent v$VERSION - Cron Mode"
+    echo "======================================"
+    echo "OS: $OS_TYPE"
+    echo "Config: $CONFIG_PATH"
+    echo "Log: $LOG_FILE"
+    echo "Cron Log: $CRON_LOG"
+    echo
+    
+    if [[ ! -f "$CONFIG_PATH" ]]; then
+        echo "Status: Not configured"
+        echo "Run '$0 --configure' to set up"
+        return
+    fi
+    
+    echo "Configuration:"
+    local destination
+    destination=$(jq -r '.destination' "$CONFIG_PATH" 2>/dev/null || echo "Invalid config")
+    echo "  Destination: $destination"
+    echo
+    
+    echo "Watch Directories:"
+    jq -r '.watch_directories[] | "  [\(.tag)] \(.path) (\(.extensions | join(", "))) - \(if .enabled then "ENABLED" else "DISABLED" end)"' "$CONFIG_PATH" 2>/dev/null || echo "  Invalid configuration"
+    echo
+    
+    # Check cron job status
+    if crontab -l 2>/dev/null | grep -q "$CRON_WRAPPER"; then
+        echo "Cron Job: Installed"
+    else
+        echo "Cron Job: Not installed"
+    fi
+    
+    # Check screen session
+    if screen_session_exists; then
+        local pid=$(get_screen_session_pid)
+        echo "Screen Session: Running (PID: $pid)"
+    else
+        echo "Screen Session: Stopped"
+    fi
+    
+    # Check status file
+    if [[ -f "$CRON_STATUS" ]]; then
+        echo "Status File:"
+        while IFS='=' read -r key value; do
+            case "$key" in
+                "status") echo "  Status: $value" ;;
+                "last_check") echo "  Last Check: $(date -r "$value" 2>/dev/null || echo "$value")" ;;
+                "install_time") echo "  Installed: $value" ;;
+                "screen_pid") echo "  Screen PID: $value" ;;
+            esac
+        done < "$CRON_STATUS"
+    else
+        echo "Status File: Not found"
+    fi
 }
 
 # Show current status
@@ -718,6 +1028,16 @@ show_status() {
             echo "Service: Not supported on this OS"
             ;;
     esac
+    
+    # Check cron status
+    if crontab -l 2>/dev/null | grep -q "$CRON_WRAPPER"; then
+        echo "Cron Job: Installed"
+        if screen_session_exists; then
+            echo "Screen Session: Running"
+        else
+            echo "Screen Session: Stopped"
+        fi
+    fi
 }
 
 # Complete installation process
@@ -732,6 +1052,24 @@ install_complete() {
         generate_config
         log "INFO" "Generated default configuration"
         log "INFO" "Edit $CONFIG_PATH to customize your setup"
+    fi
+    
+    # Check if Voice Memos is enabled and recommend cron installation
+    if voice_memos_enabled 2>/dev/null; then
+        echo
+        echo "⚠️  Voice Memos Detected!"
+        echo "Voice Memos directory is enabled in your configuration."
+        echo "Due to macOS security restrictions, LaunchAgent may not work with Voice Memos."
+        echo
+        echo "Recommendation: Use cron installation instead"
+        echo "Run: $0 --install-cron"
+        echo
+        printf "Continue with standard installation anyway? (y/n) [n]: "
+        read -r continue_standard
+        if [[ ! "$continue_standard" =~ ^[Yy]$ ]]; then
+            echo "Installation cancelled. Use --install-cron for Voice Memos support."
+            exit 0
+        fi
     fi
     
     # Install service
@@ -750,6 +1088,14 @@ install_complete() {
             echo "   - Files and Folders"
             echo "3. Grant access to directories you want to monitor"
             echo
+            if voice_memos_enabled 2>/dev/null; then
+                echo "⚠️  Voice Memos Note:"
+                echo "If you experience 'Operation not permitted' errors with Voice Memos,"
+                echo "uninstall this service and use cron installation instead:"
+                echo "  $0 --uninstall"
+                echo "  $0 --install-cron"
+                echo
+            fi
             ;;
         "linux")
             echo "Linux Setup:"
@@ -788,6 +1134,36 @@ restart_monitoring() {
     start_monitoring
 }
 
+# Start cron monitoring
+start_cron_monitoring() {
+    if screen_session_exists; then
+        echo "Screen session already running"
+        screen -list | grep "transcraib-agent"
+    else
+        screen -dmS transcraib-agent "$0" --monitor
+        sleep 2
+        if screen_session_exists; then
+            local pid=$(get_screen_session_pid)
+            echo "Started screen session with PID: $pid"
+            echo "To attach: screen -r transcraib-agent"
+            echo "To detach: Ctrl+A, then D"
+        else
+            echo "Failed to start screen session"
+        fi
+    fi
+}
+
+# Stop cron monitoring
+stop_cron_monitoring() {
+    if screen_session_exists; then
+        local pid=$(get_screen_session_pid)
+        screen -S transcraib-agent -X quit
+        echo "Stopped screen session (PID: $pid)"
+    else
+        echo "No screen session running"
+    fi
+}
+
 # Show help
 show_help() {
     cat << EOF
@@ -796,27 +1172,52 @@ Transcraib Agent v$VERSION - Automatic File Organization
 USAGE:
     $0 [COMMAND]
 
-COMMANDS:
-    --install       Complete installation (dependencies, config, service)
-    --configure     Interactive configuration wizard
-    --monitor       Start monitoring (foreground)
-    --status        Show current status
-    --start         Start monitoring service
-    --stop          Stop monitoring service  
-    --restart       Restart monitoring service
-    --uninstall     Remove service and stop monitoring
-    --help          Show this help message
+INSTALLATION COMMANDS:
+    --install           Complete installation (dependencies, config, LaunchAgent/systemd)
+    --install-cron      Install with cron + screen (bypasses LaunchAgent restrictions)
+    --configure         Interactive configuration wizard
+
+STANDARD SERVICE COMMANDS:
+    --monitor           Start monitoring (foreground)
+    --status            Show current status
+    --start             Start monitoring service
+    --stop              Stop monitoring service  
+    --restart           Restart monitoring service
+    --uninstall         Remove service and stop monitoring
+
+CRON SERVICE COMMANDS:
+    --status-cron       Show cron service status
+    --start-cron        Start screen session for monitoring
+    --stop-cron         Stop screen session
+    --uninstall-cron    Remove cron job and stop monitoring
+
+GENERAL COMMANDS:
+    --help              Show this help message
+
+INSTALLATION METHODS:
+    1. Standard (--install)
+       - Uses LaunchAgent (macOS) or systemd (Linux)
+       - Recommended for most directories
+       - May have restrictions with Voice Memos on macOS
+
+    2. Cron + Screen (--install-cron)
+       - Uses cron job + screen session
+       - Required for Voice Memos and restricted directories
+       - Bypasses macOS security restrictions
 
 EXAMPLES:
-    $0 --install        # One-command setup
-    $0 --configure      # Set up configuration
-    $0 --monitor        # Run in foreground (for testing)
-    $0 --status         # Check current status
+    $0 --install            # Standard installation
+    $0 --install-cron       # Cron installation (for Voice Memos)
+    $0 --configure          # Set up configuration
+    $0 --monitor            # Run in foreground (for testing)
+    $0 --status             # Check standard service status
+    $0 --status-cron        # Check cron service status
 
 FILES:
-    Config:  $CONFIG_PATH
-    Log:     $LOG_FILE
-    PID:     $PID_FILE
+    Config:      $CONFIG_PATH
+    Log:         $LOG_FILE
+    Cron Log:    $CRON_LOG
+    PID:         $PID_FILE
 
 For more information, see the README.md file.
 EOF
@@ -828,6 +1229,9 @@ main() {
         --install)
             install_complete
             ;;
+        --install-cron)
+            install_cron_service
+            ;;
         --configure)
             configure_interactive
             ;;
@@ -836,6 +1240,9 @@ main() {
             ;;
         --status)
             show_status
+            ;;
+        --status-cron)
+            show_cron_status
             ;;
         --start)
             case "$SERVICE_TYPE" in
@@ -861,8 +1268,17 @@ main() {
                 *) restart_monitoring ;;
             esac
             ;;
+        --start-cron)
+            start_cron_monitoring
+            ;;
+        --stop-cron)
+            stop_cron_monitoring
+            ;;
         --uninstall)
             uninstall_service
+            ;;
+        --uninstall-cron)
+            uninstall_cron_service
             ;;
         --help|-h)
             show_help
