@@ -16,7 +16,7 @@ A cross-platform file monitoring and organization system that automatically copi
 
 ### Standard Installation (Recommended)
 ```bash
-curl -O https://raw.githubusercontent.com/your-repo/deep-thought-trillian/main/deep-thought-trillian.sh
+curl -O https://raw.githubusercontent.com/tandregbg/deep-thought-trillian/main/deep-thought-trillian.sh
 chmod +x deep-thought-trillian.sh
 ./deep-thought-trillian.sh --install
 ```
