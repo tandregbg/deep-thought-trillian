@@ -1,20 +1,21 @@
 #!/bin/bash
 
-# Script: transcraib-agent.sh
+# Script: deep-thought-trillian.sh
 # Description: Advanced file monitoring and organization system
-# Version: 2.0.3
+# Version: 1.0.0
 # Supports: macOS and Ubuntu/Linux with LaunchAgent/systemd and cron variants
 
 set -euo pipefail
 
 # Constants
-readonly SCRIPT_NAME="transcraib-agent"
-readonly VERSION="2.0.3"
-readonly CONFIG_DIR="$HOME/.transcraib-agent"
+readonly SCRIPT_NAME="deep-thought-trillian"
+readonly VERSION="1.0.0"
+readonly CONFIG_DIR="$HOME/.deep-thought-trillian"
 readonly CONFIG_PATH="$CONFIG_DIR/config.json"
-readonly LOG_FILE="$CONFIG_DIR/transcraib-agent.log"
-readonly PID_FILE="$CONFIG_DIR/transcraib-agent.pid"
-readonly PROCESSED_DB="$CONFIG_DIR/transcraib-agent-processed-files"
+readonly ENV_PATH="$CONFIG_DIR/.env"
+readonly LOG_FILE="$CONFIG_DIR/deep-thought-trillian.log"
+readonly PID_FILE="$CONFIG_DIR/deep-thought-trillian.pid"
+readonly PROCESSED_DB="$CONFIG_DIR/deep-thought-trillian-processed-files"
 readonly CRON_WRAPPER="$CONFIG_DIR/cron-monitor.sh"
 readonly CRON_LOG="$CONFIG_DIR/cron-monitor.log"
 readonly SCREEN_PID="$CONFIG_DIR/screen-session.pid"
@@ -40,14 +41,14 @@ case "$OS_TYPE" in
         readonly WATCH_CMD="fswatch"
         readonly SERVICE_TYPE="launchd"
         readonly SERVICE_DIR="$HOME/Library/LaunchAgents"
-        readonly SERVICE_FILE="com.transcraib-agent.plist"
+        readonly SERVICE_FILE="com.deep-thought-trillian.plist"
         ;;
     "linux")
         readonly STAT_CMD="stat -c %Y"
         readonly WATCH_CMD="inotifywait"
         readonly SERVICE_TYPE="systemd"
         readonly SERVICE_DIR="$HOME/.config/systemd/user"
-        readonly SERVICE_FILE="transcraib-agent.service"
+        readonly SERVICE_FILE="deep-thought-trillian.service"
         ;;
     *)
         readonly STAT_CMD="stat -c %Y"
@@ -105,6 +106,91 @@ cron_log() {
     echo "$timestamp [$level] $message" >> "$CRON_LOG"
 }
 
+# Load environment variables from .env file
+load_env() {
+    if [[ -f "$ENV_PATH" ]]; then
+        log "INFO" "Loading environment variables from $ENV_PATH"
+        # Source .env file while ignoring comments and empty lines
+        while IFS= read -r line || [[ -n "$line" ]]; do
+            # Skip comments and empty lines
+            [[ "$line" =~ ^[[:space:]]*# ]] && continue
+            [[ -z "${line// }" ]] && continue
+            
+            # Export valid environment variables
+            if [[ "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
+                export "$line"
+            fi
+        done < "$ENV_PATH"
+    fi
+}
+
+# Generate default .env file
+generate_env() {
+    mkdir -p "$CONFIG_DIR"
+    
+    cat > "$ENV_PATH" << 'EOF'
+# Deep Thought Trillian Environment Configuration
+# Override JSON configuration with environment variables
+
+# Core functionality
+# DTT_SOURCE_DIR=~/Downloads
+# DTT_DEST_DIR=~/Documents/organized-files
+# DTT_FILE_TAG=download
+# DTT_EXTENSIONS=pdf,jpg,png,mp4
+
+# Behavior settings
+# DTT_LOG_LEVEL=INFO
+# DTT_POLL_INTERVAL=5
+# DTT_REAL_TIME=true
+
+# Feature flags
+# DTT_VOICE_MEMOS=true
+# DTT_AUTO_CREATE_DIRS=true
+EOF
+    
+    log "INFO" "Generated default .env file at $ENV_PATH"
+}
+
+# Parse command-line arguments
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -s|--source)
+                DTT_SOURCE_DIR="$2"
+                shift 2
+                ;;
+            -d|--dest)
+                DTT_DEST_DIR="$2"
+                shift 2
+                ;;
+            -t|--tag)
+                DTT_FILE_TAG="$2"
+                shift 2
+                ;;
+            -e|--extensions)
+                DTT_EXTENSIONS="$2"
+                shift 2
+                ;;
+            -l|--log-level)
+                DTT_LOG_LEVEL="$2"
+                shift 2
+                ;;
+            -p|--poll)
+                DTT_POLL_INTERVAL="$2"
+                shift 2
+                ;;
+            --setup)
+                SETUP_ONLY=true
+                shift
+                ;;
+            *)
+                # Unknown option, skip
+                shift
+                ;;
+        esac
+    done
+}
+
 # Check if command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
@@ -112,12 +198,12 @@ command_exists() {
 
 # Check if screen session exists
 screen_session_exists() {
-    screen -list 2>/dev/null | grep -q "transcraib-agent"
+    screen -list 2>/dev/null | grep -q "deep-thought-trillian"
 }
 
 # Get screen session PID
 get_screen_session_pid() {
-    screen -list 2>/dev/null | grep "transcraib-agent" | cut -d. -f1 | tr -d '\t' 2>/dev/null || echo ""
+    screen -list 2>/dev/null | grep "deep-thought-trillian" | cut -d. -f1 | tr -d '\t' 2>/dev/null || echo ""
 }
 
 # Check and install dependencies
@@ -248,8 +334,8 @@ configure_interactive() {
     
     echo
     echo "==================================="
-    echo "   Transcraib Agent Configuration"
-    echo "==================================="
+    echo "   Deep Thought Trillian Configuration"
+    echo "=================================="
     echo
     
     # Get destination directory
@@ -271,14 +357,14 @@ configure_interactive() {
             echo
             if [[ "$create" =~ ^[Yy]$ ]]; then
                 if mkdir -p "$dest_dir"; then
-                    echo "✓ Created directory: $dest_dir"
+                    echo "[OK] Created directory: $dest_dir"
                     break
                 else
-                    echo "✗ Failed to create directory"
+                    echo "[ERROR] Failed to create directory"
                 fi
             fi
         else
-            echo "✓ Directory exists and is accessible"
+            echo "[OK] Directory exists and is accessible"
             break
         fi
     done
@@ -310,13 +396,13 @@ configure_interactive() {
     echo
     
     if [[ "$method_choice" == "2" ]]; then
-        echo "✓ Configuration wizard complete!"
-        echo "✓ Edit $CONFIG_PATH to customize your setup"
-        echo "✓ Run '$0 --install-cron' to install with cron + screen method"
+        echo "[OK] Configuration wizard complete!"
+        echo "[OK] Edit $CONFIG_PATH to customize your setup"
+        echo "[OK] Run '$0 --install-cron' to install with cron + screen method"
     else
-        echo "✓ Configuration wizard complete!"
-        echo "✓ Edit $CONFIG_PATH to customize your setup"
-        echo "✓ Run '$0 --install' to install with standard method"
+        echo "[OK] Configuration wizard complete!"
+        echo "[OK] Edit $CONFIG_PATH to customize your setup"
+        echo "[OK] Run '$0 --install' to install with standard method"
     fi
 }
 
@@ -572,19 +658,147 @@ monitor_inotify() {
     done
 }
 
-# Main monitoring function
-start_monitoring() {
-    # Validate configuration
-    if ! validate_config; then
+# Setup configuration files without installing
+setup_config() {
+    log "INFO" "Setting up configuration files..."
+    
+    # Generate configuration if it doesn't exist
+    if [[ ! -f "$CONFIG_PATH" ]]; then
+        generate_config
+        log "INFO" "Generated default configuration at $CONFIG_PATH"
+    else
+        log "INFO" "Configuration already exists at $CONFIG_PATH"
+    fi
+    
+    # Generate .env file if it doesn't exist
+    if [[ ! -f "$ENV_PATH" ]]; then
+        generate_env
+        log "INFO" "Generated default .env file at $ENV_PATH"
+    else
+        log "INFO" ".env file already exists at $ENV_PATH"
+    fi
+    
+    echo
+    echo "Setup Complete!"
+    echo "==============="
+    echo "Configuration: $CONFIG_PATH"
+    echo "Environment:   $ENV_PATH"
+    echo
+    echo "You can now run manually with:"
+    echo "  $0 --monitor"
+    echo "Or with arguments:"
+    echo "  $0 --monitor --source ~/Downloads --dest ~/organized --tag download --ext pdf,jpg"
+}
+
+# Monitor with manual arguments (no config files required)
+monitor_manual() {
+    local source_dir="${DTT_SOURCE_DIR:-}"
+    local dest_dir="${DTT_DEST_DIR:-}"
+    local file_tag="${DTT_FILE_TAG:-manual}"
+    local extensions="${DTT_EXTENSIONS:-pdf,jpg,png,doc,docx}"
+    local poll_interval="${DTT_POLL_INTERVAL:-5}"
+    
+    # Validate required parameters
+    if [[ -z "$source_dir" || -z "$dest_dir" ]]; then
+        log "ERROR" "Manual mode requires source and destination directories"
+        echo "Usage: $0 --monitor --source <dir> --dest <dir> [--tag <tag>] [--ext <extensions>]"
+        echo "Or set environment variables: DTT_SOURCE_DIR, DTT_DEST_DIR"
         exit 1
     fi
     
-    # Get destination from config
+    # Expand ~ in paths
+    source_dir="${source_dir/#\~/$HOME}"
+    dest_dir="${dest_dir/#\~/$HOME}"
+    
+    # Validate directories
+    if [[ ! -d "$source_dir" ]]; then
+        log "ERROR" "Source directory does not exist: $source_dir"
+        exit 1
+    fi
+    
+    # Create destination directory if it doesn't exist
+    if [[ ! -d "$dest_dir" ]]; then
+        if [[ "${DTT_AUTO_CREATE_DIRS:-true}" == "true" ]]; then
+            mkdir -p "$dest_dir"
+            log "INFO" "Created destination directory: $dest_dir"
+        else
+            log "ERROR" "Destination directory does not exist: $dest_dir"
+            exit 1
+        fi
+    fi
+    
+    log "INFO" "Starting Deep Thought Trillian v$VERSION (Manual Mode)"
+    log "INFO" "Source: $source_dir"
+    log "INFO" "Destination: $dest_dir"
+    log "INFO" "Tag: $file_tag"
+    log "INFO" "Extensions: $extensions"
+    log "INFO" "Poll interval: ${poll_interval}s"
+    
+    # Convert extensions to array
+    IFS=',' read -ra ext_array <<< "$extensions"
+    
+    # Store PID
+    echo $ > "$PID_FILE"
+    
+    # Set up signal handlers
+    trap 'log "INFO" "Shutting down..."; rm -f "$PID_FILE"; exit 0' SIGTERM SIGINT
+    
+    # Simple polling loop for manual mode
+    while true; do
+        for ext in "${ext_array[@]}"; do
+            ext="${ext// /}"  # Remove spaces
+            [[ -z "$ext" ]] && continue
+            
+            while IFS= read -r -d '' file; do
+                [[ -f "$file" ]] && process_file "$file" "$file_tag" "$dest_dir"
+            done < <(find "$source_dir" -maxdepth 1 -name "*.$ext" -type f -print0 2>/dev/null || true)
+        done
+        
+        sleep "$poll_interval"
+    done
+}
+
+# Main monitoring function
+start_monitoring() {
+    # Parse command-line arguments first
+    parse_arguments "$@"
+    
+    # Check if we have manual mode parameters
+    if [[ -n "${DTT_SOURCE_DIR:-}" && -n "${DTT_DEST_DIR:-}" ]]; then
+        monitor_manual
+        return
+    fi
+    
+    # Load environment variables
+    load_env
+    
+    # Check again after loading .env
+    if [[ -n "${DTT_SOURCE_DIR:-}" && -n "${DTT_DEST_DIR:-}" ]]; then
+        monitor_manual
+        return
+    fi
+    
+    # Fall back to config-based monitoring
+    # Validate configuration
+    if ! validate_config; then
+        log "ERROR" "No configuration found and no manual parameters provided"
+        log "INFO" "Run '$0 --setup' to create configuration files"
+        log "INFO" "Or use manual mode: $0 --monitor --source <dir> --dest <dir>"
+        exit 1
+    fi
+    
+    # Get destination from config, with .env override
     local destination
     destination=$(jq -r '.destination' "$CONFIG_PATH")
     destination="${destination/#\~/$HOME}"
     
-    log "INFO" "Starting Transcraib Agent v$VERSION"
+    # Override with environment variable if set
+    if [[ -n "${DTT_DEST_DIR:-}" ]]; then
+        destination="${DTT_DEST_DIR/#\~/$HOME}"
+        log "INFO" "Using destination from DTT_DEST_DIR: $destination"
+    fi
+    
+    log "INFO" "Starting Deep Thought Trillian v$VERSION"
     log "INFO" "Destination: $destination"
     log "INFO" "OS: $OS_TYPE"
     
@@ -632,7 +846,7 @@ create_cron_wrapper() {
     cat > "$CRON_WRAPPER" << EOF
 #!/bin/bash
 
-# Cron wrapper for Transcraib Agent
+# Cron wrapper for Deep Thought Trillian
 # This script ensures the screen session is always running
 
 SCRIPT_PATH="$script_path"
@@ -652,12 +866,12 @@ cron_log() {
 
 # Check if screen session exists
 screen_session_exists() {
-    screen -list 2>/dev/null | grep -q "transcraib-agent"
+    screen -list 2>/dev/null | grep -q "deep-thought-trillian"
 }
 
 # Get screen session PID
 get_screen_session_pid() {
-    screen -list 2>/dev/null | grep "transcraib-agent" | cut -d. -f1 | tr -d '\t' 2>/dev/null || echo ""
+    screen -list 2>/dev/null | grep "deep-thought-trillian" | cut -d. -f1 | tr -d '\t' 2>/dev/null || echo ""
 }
 
 # Update status file
@@ -673,7 +887,7 @@ update_status() {
 # Main logic
 if ! screen_session_exists; then
     cron_log "INFO" "Screen session not found, starting new session"
-    screen -dmS transcraib-agent "\$SCRIPT_PATH" --monitor
+    screen -dmS deep-thought-trillian "\$SCRIPT_PATH" --monitor
     sleep 2
     
     if screen_session_exists; then
@@ -718,7 +932,7 @@ install_cron_job() {
         echo "$new_cron_line"
     } | crontab -
     
-    log "INFO" "Installed cron job for Transcraib Agent"
+    log "INFO" "Installed cron job for Deep Thought Trillian"
 }
 
 # Remove cron job
@@ -738,7 +952,7 @@ remove_cron_job() {
         crontab -r 2>/dev/null || true
     fi
     
-    log "INFO" "Removed cron job for Transcraib Agent"
+    log "INFO" "Removed cron job for Deep Thought Trillian"
 }
 
 # Install as system service
@@ -756,7 +970,7 @@ install_service() {
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.transcraib-agent</string>
+    <string>com.deep-thought-trillian</string>
     <key>ProgramArguments</key>
     <array>
         <string>$script_path</string>
@@ -789,7 +1003,7 @@ EOF
         "systemd")
             cat > "$SERVICE_DIR/$SERVICE_FILE" << EOF
 [Unit]
-Description=Transcraib Agent File Monitor
+Description=Deep Thought Trillian File Monitor
 After=network.target
 
 [Service]
@@ -833,6 +1047,11 @@ install_cron_service() {
         log "INFO" "Edit $CONFIG_PATH to customize your setup"
     fi
     
+    # Generate .env file if it doesn't exist
+    if [[ ! -f "$ENV_PATH" ]]; then
+        generate_env
+    fi
+    
     # Create cron wrapper script
     create_cron_wrapper
     
@@ -856,9 +1075,9 @@ install_cron_service() {
     echo "Cron logs: $CRON_LOG"
     echo "Status: $CRON_STATUS"
     echo
-    echo "✓ Cron job checks every minute for screen session"
-    echo "✓ Screen session runs the monitoring in background"
-    echo "✓ Bypasses macOS security restrictions for Voice Memos"
+    echo "[OK] Cron job checks every minute for screen session"
+    echo "[OK] Screen session runs the monitoring in background"
+    echo "[OK] Bypasses macOS security restrictions for Voice Memos"
     echo
     echo "Next steps:"
     echo "1. Edit configuration: $CONFIG_PATH"
@@ -876,7 +1095,7 @@ uninstall_cron_service() {
     if screen_session_exists; then
         local pid=$(get_screen_session_pid)
         if [[ -n "$pid" ]]; then
-            screen -S transcraib-agent -X quit
+            screen -S deep-thought-trillian -X quit
             log "INFO" "Stopped screen session (PID: $pid)"
         fi
     fi
@@ -920,8 +1139,8 @@ uninstall_service() {
 
 # Show cron status
 show_cron_status() {
-    echo "Transcraib Agent v$VERSION - Cron Mode"
-    echo "======================================"
+    echo "Deep Thought Trillian v$VERSION - Cron Mode"
+    echo "==========================================="
     echo "OS: $OS_TYPE"
     echo "Config: $CONFIG_PATH"
     echo "Log: $LOG_FILE"
@@ -977,8 +1196,8 @@ show_cron_status() {
 
 # Show current status
 show_status() {
-    echo "Transcraib Agent v$VERSION"
-    echo "========================="
+    echo "Deep Thought Trillian v$VERSION"
+    echo "=============================="
     echo "OS: $OS_TYPE"
     echo "Config: $CONFIG_PATH"
     echo "Log: $LOG_FILE"
@@ -1057,7 +1276,7 @@ install_complete() {
     # Check if Voice Memos is enabled and recommend cron installation
     if voice_memos_enabled 2>/dev/null; then
         echo
-        echo "⚠️  Voice Memos Detected!"
+        echo "[WARNING] Voice Memos Detected!"
         echo "Voice Memos directory is enabled in your configuration."
         echo "Due to macOS security restrictions, LaunchAgent may not work with Voice Memos."
         echo
@@ -1089,7 +1308,7 @@ install_complete() {
             echo "3. Grant access to directories you want to monitor"
             echo
             if voice_memos_enabled 2>/dev/null; then
-                echo "⚠️  Voice Memos Note:"
+                echo "[WARNING] Voice Memos Note:"
                 echo "If you experience 'Operation not permitted' errors with Voice Memos,"
                 echo "uninstall this service and use cron installation instead:"
                 echo "  $0 --uninstall"
@@ -1100,7 +1319,7 @@ install_complete() {
         "linux")
             echo "Linux Setup:"
             echo "- Service installed and started automatically"
-            echo "- Check status with: systemctl --user status transcraib-agent"
+            echo "- Check status with: systemctl --user status deep-thought-trillian"
             echo
             ;;
     esac
@@ -1138,14 +1357,14 @@ restart_monitoring() {
 start_cron_monitoring() {
     if screen_session_exists; then
         echo "Screen session already running"
-        screen -list | grep "transcraib-agent"
+        screen -list | grep "deep-thought-trillian"
     else
-        screen -dmS transcraib-agent "$0" --monitor
+        screen -dmS deep-thought-trillian "$0" --monitor
         sleep 2
         if screen_session_exists; then
             local pid=$(get_screen_session_pid)
             echo "Started screen session with PID: $pid"
-            echo "To attach: screen -r transcraib-agent"
+            echo "To attach: screen -r deep-thought-trillian"
             echo "To detach: Ctrl+A, then D"
         else
             echo "Failed to start screen session"
@@ -1157,7 +1376,7 @@ start_cron_monitoring() {
 stop_cron_monitoring() {
     if screen_session_exists; then
         local pid=$(get_screen_session_pid)
-        screen -S transcraib-agent -X quit
+        screen -S deep-thought-trillian -X quit
         echo "Stopped screen session (PID: $pid)"
     else
         echo "No screen session running"
@@ -1167,7 +1386,7 @@ stop_cron_monitoring() {
 # Show help
 show_help() {
     cat << EOF
-Transcraib Agent v$VERSION - Automatic File Organization
+Deep Thought Trillian v$VERSION - Automatic File Organization
 
 USAGE:
     $0 [COMMAND]
@@ -1176,14 +1395,24 @@ INSTALLATION COMMANDS:
     --install           Complete installation (dependencies, config, LaunchAgent/systemd)
     --install-cron      Install with cron + screen (bypasses LaunchAgent restrictions)
     --configure         Interactive configuration wizard
+    --setup             Create config files without installing service
 
-STANDARD SERVICE COMMANDS:
+MONITORING COMMANDS:
     --monitor           Start monitoring (foreground)
+    --monitor [options] Start manual monitoring with arguments
     --status            Show current status
     --start             Start monitoring service
     --stop              Stop monitoring service  
     --restart           Restart monitoring service
     --uninstall         Remove service and stop monitoring
+
+MANUAL MONITORING OPTIONS:
+    -s, --source <dir>  Source directory to monitor
+    -d, --dest <dir>    Destination directory for organized files
+    -t, --tag <tag>     Tag prefix for files (default: manual)
+    -e, --ext <list>    File extensions (comma-separated, default: pdf,jpg,png,doc,docx)
+    -l, --log-level     Log level (DEBUG, INFO, WARN, ERROR)
+    -p, --poll <sec>    Polling interval in seconds (default: 5)
 
 CRON SERVICE COMMANDS:
     --status-cron       Show cron service status
@@ -1209,7 +1438,10 @@ EXAMPLES:
     $0 --install            # Standard installation
     $0 --install-cron       # Cron installation (for Voice Memos)
     $0 --configure          # Set up configuration
-    $0 --monitor            # Run in foreground (for testing)
+    $0 --setup              # Create config files only
+    $0 --monitor            # Run with config files
+    $0 --monitor --source ~/Downloads --dest ~/organized --tag download --ext pdf,jpg
+    DTT_SOURCE_DIR=~/Downloads DTT_DEST_DIR=~/organized $0 --monitor
     $0 --status             # Check standard service status
     $0 --status-cron        # Check cron service status
 
@@ -1234,6 +1466,9 @@ main() {
             ;;
         --configure)
             configure_interactive
+            ;;
+        --setup)
+            setup_config
             ;;
         --monitor)
             start_monitoring
