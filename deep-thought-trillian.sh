@@ -663,6 +663,16 @@ validate_config() {
         return 1
     fi
     
+    # Check if this is upload-only mode
+    local upload_mode
+    upload_mode=$(jq -r '.api_upload.upload_mode // "copy_and_upload"' "$CONFIG_PATH" 2>/dev/null)
+    
+    # Skip destination validation for upload-only mode
+    if [[ "$upload_mode" == "upload_only" ]]; then
+        log "DEBUG" "Upload-only mode detected, skipping destination validation"
+        return 0
+    fi
+    
     # Expand ~ in destination
     destination="${destination/#\~/$HOME}"
     
@@ -893,6 +903,7 @@ install_api_setup() {
                     mkdir -p "${source_path/#\~/$HOME}"
                     echo "✓ Created directory: $source_path"
                 else
+                    echo "⚠ No folder name provided, using ~/Downloads"
                     source_path="~/Downloads"
                 fi
             else
