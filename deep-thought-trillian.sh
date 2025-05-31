@@ -462,7 +462,7 @@ upload_file_to_api() {
 # Get API configuration from config file and environment
 get_api_config() {
     local api_enabled="${DTT_API_UPLOAD_ENABLED:-false}"
-    local api_endpoint="${DTT_API_ENDPOINT:-}"
+    local api_endpoint="${DTT_API_ENDPOINT:-https://api.deep-thought.cloud/api/v1/transcribe}"
     local api_username="${DTT_API_USERNAME:-}"
     local api_password="${DTT_API_PASSWORD:-}"
     local api_upload_mode="${DTT_API_UPLOAD_MODE:-copy_and_upload}"
