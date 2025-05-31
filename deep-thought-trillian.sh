@@ -906,10 +906,10 @@ install_api_setup() {
                     mkdir -p "${source_path/#\~/$HOME}"
                     echo "✓ Created directory: $source_path"
                 else
-                    # Use default folder name if none provided
-                    source_path="~/Documents/deep-thought-trillian/monitored-files"
+                    # Use the base directory if no folder name provided
+                    source_path="~/Documents/deep-thought-trillian"
                     mkdir -p "${source_path/#\~/$HOME}"
-                    echo "⚠ No folder name provided, created default: $source_path"
+                    echo "⚠ No folder name provided, using base directory: $source_path"
                 fi
             else
                 printf "Enter custom path: "
