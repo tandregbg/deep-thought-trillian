@@ -2,7 +2,7 @@
 
 # Script: deep-thought-trillian.sh
 # Description: Advanced file monitoring and organization system with API upload support
-# Version: 1.1.0
+# Version: 1.1.1
 # Supports: macOS and Ubuntu/Linux with LaunchAgent/systemd and cron variants
 # New: HTTP Basic Auth API upload functionality
 
@@ -10,7 +10,7 @@ set -euo pipefail
 
 # Constants
 readonly SCRIPT_NAME="deep-thought-trillian"
-readonly VERSION="1.1.0"
+readonly VERSION="1.1.1"
 readonly CONFIG_DIR="$HOME/.deep-thought-trillian"
 readonly CONFIG_PATH="$CONFIG_DIR/config.json"
 readonly ENV_PATH="$CONFIG_DIR/.env"
@@ -677,6 +677,371 @@ validate_config() {
 # Check if Voice Memos directory is enabled
 voice_memos_enabled() {
     jq -r '.watch_directories[] | select(.name == "voice_memos") | .enabled' "$CONFIG_PATH" 2>/dev/null | grep -q "true"
+}
+
+# Detect Voice Memos folder and count files
+detect_voice_memos() {
+    if [[ "$OS_TYPE" == "macos" ]]; then
+        local voice_memos_path="$HOME/Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings"
+        if [[ -d "$voice_memos_path" ]]; then
+            local count=$(find "$voice_memos_path" -name "*.m4a" 2>/dev/null | wc -l | tr -d ' ')
+            if [[ "$count" -gt 0 ]]; then
+                echo "Voice Memos ($count recordings found)"
+            else
+                echo "Voice Memos (folder exists)"
+            fi
+            return 0
+        fi
+    fi
+    return 1
+}
+
+# Test API connection
+test_api_connection() {
+    local endpoint="$1"
+    local username="$2"
+    local password="$3"
+    
+    if [[ -z "$endpoint" || -z "$username" || -z "$password" ]]; then
+        return 1
+    fi
+    
+    # Simple connection test
+    local http_code
+    http_code=$(curl -s -w "%{http_code}" -u "$username:$password" \
+        --connect-timeout 10 --max-time 15 \
+        -X GET "$endpoint" -o /dev/null 2>/dev/null || echo "000")
+    
+    # Accept various success codes (200, 405 for method not allowed, etc.)
+    if [[ "$http_code" =~ ^(200|405|404)$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Generate minimal API-only config
+generate_api_config() {
+    local endpoint="$1"
+    local username="$2"
+    local password="$3"
+    local source_path="$4"
+    local tag="${5:-upload}"
+    
+    mkdir -p "$CONFIG_DIR"
+    
+    cat > "$CONFIG_PATH" << EOF
+{
+  "destination": "/tmp/unused",
+  "api_upload": {
+    "enabled": true,
+    "endpoint": "$endpoint",
+    "username": "$username",
+    "password": "$password",
+    "upload_mode": "upload_only",
+    "timeout": 30
+  },
+  "watch_directories": [
+    {
+      "name": "api_monitor",
+      "path": "$source_path",
+      "extensions": ["pdf", "jpg", "png", "doc", "docx", "m4a", "wav"],
+      "tag": "$tag",
+      "enabled": true
+    }
+  ]
+}
+EOF
+    
+    log "INFO" "Generated API-only configuration at $CONFIG_PATH"
+}
+
+# Generate minimal local-only config
+generate_local_config() {
+    local source_path="$1"
+    local dest_path="$2"
+    local extensions="$3"
+    local tag="${4:-local}"
+    
+    mkdir -p "$CONFIG_DIR"
+    
+    cat > "$CONFIG_PATH" << EOF
+{
+  "destination": "$dest_path",
+  "api_upload": {
+    "enabled": false,
+    "endpoint": "https://api.deep-thought.cloud/api/v1/transcribe",
+    "username": "",
+    "password": "",
+    "upload_mode": "copy_only",
+    "timeout": 30
+  },
+  "watch_directories": [
+    {
+      "name": "local_monitor",
+      "path": "$source_path",
+      "extensions": $extensions,
+      "tag": "$tag",
+      "enabled": true
+    }
+  ]
+}
+EOF
+    
+    log "INFO" "Generated local-only configuration at $CONFIG_PATH"
+}
+
+# API installation setup
+install_api_setup() {
+    echo
+    echo "Deep Thought Trillian - API Upload Setup"
+    echo "======================================="
+    echo
+    
+    # Get API endpoint
+    printf "API endpoint URL? [https://api.deep-thought.cloud/api/v1/transcribe]: "
+    read -r api_endpoint
+    api_endpoint="${api_endpoint:-https://api.deep-thought.cloud/api/v1/transcribe}"
+    
+    # Get credentials
+    printf "Username: "
+    read -r api_username
+    
+    printf "Password: "
+    read -rs api_password
+    echo
+    
+    # Test API connection
+    echo "Testing API connection..."
+    if test_api_connection "$api_endpoint" "$api_username" "$api_password"; then
+        echo "✓ API connection test successful"
+    else
+        echo "⚠ API connection test failed (will proceed anyway)"
+    fi
+    echo
+    
+    # Folder selection with suggestions
+    echo "Folder to monitor?"
+    echo "  Common options:"
+    echo "  1. ~/Downloads (browser downloads)"
+    
+    # Add Voice Memos option on macOS
+    local voice_memos_option=""
+    if detect_voice_memos >/dev/null 2>&1; then
+        voice_memos_option=$(detect_voice_memos)
+        echo "  2. $voice_memos_option ⭐"
+        echo "  3. ~/Desktop (desktop files)"
+        echo "  4. ~/Documents (document folder)"
+        echo "  5. Custom path"
+    else
+        echo "  2. ~/Desktop (desktop files)"
+        echo "  3. ~/Documents (document folder)"
+        echo "  4. Custom path"
+    fi
+    
+    printf "  Choose [1]: "
+    read -r folder_choice
+    folder_choice="${folder_choice:-1}"
+    
+    local source_path
+    local tag="upload"
+    local use_cron=false
+    
+    case "$folder_choice" in
+        1) source_path="~/Downloads" ;;
+        2) 
+            if [[ -n "$voice_memos_option" ]]; then
+                source_path="~/Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings"
+                tag="voice"
+                use_cron=true
+                echo "✓ Selected Voice Memos folder"
+                echo "⚠ Voice Memos requires special permissions on macOS"
+                echo "✓ Will use cron installation method for Voice Memos access"
+            else
+                source_path="~/Desktop"
+            fi
+            ;;
+        3)
+            if [[ -n "$voice_memos_option" ]]; then
+                source_path="~/Desktop"
+            else
+                source_path="~/Documents"
+            fi
+            ;;
+        4)
+            if [[ -n "$voice_memos_option" ]]; then
+                source_path="~/Documents"
+            else
+                printf "Enter custom path: "
+                read -r source_path
+            fi
+            ;;
+        5)
+            printf "Enter custom path: "
+            read -r source_path
+            ;;
+        *) source_path="~/Downloads" ;;
+    esac
+    
+    # Expand ~ in source path
+    source_path_expanded="${source_path/#\~/$HOME}"
+    
+    # Validate source directory
+    if [[ ! -d "$source_path_expanded" ]]; then
+        echo "⚠ Directory doesn't exist: $source_path_expanded"
+        echo "This may cause issues during monitoring."
+    else
+        local file_count=$(find "$source_path_expanded" -maxdepth 1 -type f \( -name "*.pdf" -o -name "*.jpg" -o -name "*.png" -o -name "*.doc" -o -name "*.docx" -o -name "*.m4a" -o -name "*.wav" \) 2>/dev/null | wc -l | tr -d ' ')
+        echo "✓ Found $file_count files that will be uploaded"
+    fi
+    
+    # Generate configuration
+    generate_api_config "$api_endpoint" "$api_username" "$api_password" "$source_path" "$tag"
+    
+    # Install service (use cron for Voice Memos)
+    if [[ "$use_cron" == "true" ]]; then
+        echo "Installing with cron method for Voice Memos..."
+        install_cron_service_minimal
+    else
+        echo "Installing service..."
+        check_dependencies
+        install_service
+    fi
+    
+    echo
+    echo "✓ API Upload Setup Complete!"
+    echo "✓ Monitoring: $source_path"
+    echo "✓ Uploading to: $api_endpoint"
+    echo "✓ Service installed and running"
+    echo
+    echo "Check status: $0 --status"
+    echo "View logs: tail -f $LOG_FILE"
+}
+
+# Local installation setup
+install_local_setup() {
+    echo
+    echo "Deep Thought Trillian - Local Organization Setup"
+    echo "==============================================="
+    echo
+    
+    # Source folder selection
+    echo "Source folder to monitor?"
+    echo "  Common options:"
+    echo "  1. ~/Downloads (browser downloads)"
+    echo "  2. ~/Desktop (desktop files)"
+    echo "  3. ~/Documents (document folder)"
+    echo "  4. Custom path"
+    printf "  Choose [1]: "
+    read -r source_choice
+    source_choice="${source_choice:-1}"
+    
+    local source_path
+    case "$source_choice" in
+        1) source_path="~/Downloads" ;;
+        2) source_path="~/Desktop" ;;
+        3) source_path="~/Documents" ;;
+        4) 
+            printf "Enter custom path: "
+            read -r source_path
+            ;;
+        *) source_path="~/Downloads" ;;
+    esac
+    
+    # Destination folder selection
+    echo
+    echo "Destination folder for organized files?"
+    echo "  Suggested options:"
+    echo "  1. ~/Documents/organized-files"
+    echo "  2. ~/Dropbox/organized-files"
+    echo "  3. ~/Google Drive/organized-files"
+    echo "  4. Custom path"
+    printf "  Choose [1]: "
+    read -r dest_choice
+    dest_choice="${dest_choice:-1}"
+    
+    local dest_path
+    case "$dest_choice" in
+        1) dest_path="~/Documents/organized-files" ;;
+        2) dest_path="~/Dropbox/organized-files" ;;
+        3) dest_path="~/Google Drive/organized-files" ;;
+        4) 
+            printf "Enter custom path: "
+            read -r dest_path
+            ;;
+        *) dest_path="~/Documents/organized-files" ;;
+    esac
+    
+    # File types
+    printf "File types to monitor? [pdf,jpg,png,doc,docx]: "
+    read -r file_types
+    file_types="${file_types:-pdf,jpg,png,doc,docx}"
+    
+    # Convert to JSON array
+    local extensions_json
+    extensions_json=$(echo "$file_types" | sed 's/,/", "/g' | sed 's/^/["/' | sed 's/$/"]/')
+    
+    # Expand paths
+    local source_path_expanded="${source_path/#\~/$HOME}"
+    local dest_path_expanded="${dest_path/#\~/$HOME}"
+    
+    # Validate and create directories
+    if [[ ! -d "$source_path_expanded" ]]; then
+        echo "⚠ Source directory doesn't exist: $source_path_expanded"
+    else
+        echo "✓ Source directory exists and is accessible"
+    fi
+    
+    if [[ ! -d "$dest_path_expanded" ]]; then
+        echo "Creating destination directory: $dest_path_expanded"
+        if mkdir -p "$dest_path_expanded"; then
+            echo "✓ Destination directory created"
+        else
+            echo "✗ Failed to create destination directory"
+            exit 1
+        fi
+    else
+        echo "✓ Destination directory exists"
+    fi
+    
+    # Generate configuration
+    generate_local_config "$source_path" "$dest_path" "$extensions_json" "local"
+    
+    # Install service
+    echo "Installing service..."
+    check_dependencies
+    install_service
+    
+    echo
+    echo "✓ Local Organization Setup Complete!"
+    echo "✓ Monitoring: $source_path"
+    echo "✓ Organizing to: $dest_path"
+    echo "✓ File types: $file_types"
+    echo "✓ Service installed and running"
+    echo
+    echo "Check status: $0 --status"
+    echo "View logs: tail -f $LOG_FILE"
+}
+
+# Minimal cron installation for API setup
+install_cron_service_minimal() {
+    log "INFO" "Installing cron-based monitoring for Voice Memos..."
+    
+    # Check dependencies
+    check_dependencies
+    
+    # Create cron wrapper script
+    create_cron_wrapper
+    
+    # Install cron job
+    install_cron_job
+    
+    # Initialize status file
+    echo "status=installed" > "$CRON_STATUS"
+    echo "last_check=$(date +%s)" >> "$CRON_STATUS"
+    echo "install_time=$(date)" >> "$CRON_STATUS"
+    
+    log "INFO" "Cron-based monitoring installed successfully"
 }
 
 # Process a single file
@@ -1863,6 +2228,8 @@ USAGE:
 
 INSTALLATION COMMANDS:
     --install           Complete installation (dependencies, config, LaunchAgent/systemd)
+    --install-api       Quick API upload setup (30 seconds)
+    --install-local     Quick local organization setup (30 seconds)
     --install-cron      Install with cron + screen (bypasses LaunchAgent restrictions)
     --configure         Interactive configuration wizard
     --setup             Create config files without installing service
@@ -1966,6 +2333,12 @@ main() {
     case "${1:-}" in
         --install)
             install_complete
+            ;;
+        --install-api)
+            install_api_setup
+            ;;
+        --install-local)
+            install_local_setup
             ;;
         --install-cron)
             install_cron_service

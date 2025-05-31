@@ -1,4 +1,4 @@
-# Deep Thought Trillian v1.1.0
+# Deep Thought Trillian v1.1.1
 
 A cross-platform file monitoring and organization system that automatically copies files from specified directories to a centralized destination with intelligent tagging and naming, plus HTTP API upload support for server integration.
 
@@ -14,12 +14,28 @@ A cross-platform file monitoring and organization system that automatically copi
 - **Voice Memos support** with cron-based bypass for macOS restrictions
 - **Environment variable configuration** (.env support)
 
-## Installation
+## Quick Start (30 seconds)
 
-### Standard Installation (Recommended)
+### API Upload Setup
 ```bash
 curl -O https://raw.githubusercontent.com/tandregbg/deep-thought-trillian/main/deep-thought-trillian.sh
 chmod +x deep-thought-trillian.sh
+./deep-thought-trillian.sh --install-api
+```
+Enter: API endpoint, username, password, folder to monitor  
+Done! Files are now uploaded automatically.
+
+### Local File Organization
+```bash
+./deep-thought-trillian.sh --install-local
+```
+Enter: source folder, destination folder, file types  
+Done! Files are now organized locally.
+
+## Advanced Installation
+
+### Standard Installation (Full Configuration)
+```bash
 ./deep-thought-trillian.sh --install
 ```
 
@@ -455,6 +471,49 @@ Planned improvements for future versions:
 - Performance metrics and analytics
 - Plugin architecture for custom processors
 
+## Changelog
+
+### v1.1.1 (2025-05-31)
+**Enhanced User Experience & Quick Setup**
+
+#### New Features
+- **Quick Installation Commands**: Added `--install-api` and `--install-local` for 30-second setup
+- **Smart Folder Suggestions**: Interactive prompts with common folder options (Downloads, Desktop, Documents)
+- **Voice Memos Auto-Detection**: Automatically detects and suggests Voice Memos folder on macOS with file count
+- **API Connection Testing**: Tests API connectivity during setup process
+- **Intelligent Installation**: Automatically chooses cron method for Voice Memos to bypass macOS restrictions
+
+#### Improvements
+- **Streamlined Script**: Moved verbose documentation from script to README for better maintainability
+- **Enhanced Help**: Updated help text to prominently feature new quick installation options
+- **Better Validation**: Validates directories and shows file counts during setup
+- **Clearer Feedback**: Provides immediate success confirmations and next steps
+
+#### User Experience
+- **30-Second Setup**: Get up and running with either API upload or local organization in under 30 seconds
+- **Guided Prompts**: Clear, numbered options for folder selection
+- **Voice Memos Made Easy**: Seamless setup for macOS Voice Memos with automatic permission handling
+- **Immediate Functionality**: Services start automatically after installation
+
+### v1.1.0 (2024-11-24)
+**HTTP API Integration**
+
+- Added HTTP API upload functionality with Basic Authentication
+- Introduced flexible upload modes (copy_only, upload_only, copy_and_upload)
+- Enhanced configuration options for API integration
+- Improved error handling and logging for API operations
+- Added server integration for automated file processing
+
+### v1.0.0 (2024-10-15)
+**Initial Release**
+
+- Cross-platform file monitoring (macOS and Linux)
+- Real-time file system monitoring with fswatch/inotify
+- Dual installation modes (LaunchAgent/systemd and Cron/Screen)
+- JSON-based configuration with environment variable support
+- Voice Memos support with macOS security bypass
+- Intelligent file organization with tagging and duplicate handling
+
 ---
 
-**Deep Thought Trillian v1.1.0** - Keeping your files organized automatically with HTTP API integration!
+**Deep Thought Trillian v1.1.1** - Keeping your files organized automatically with HTTP API integration!
