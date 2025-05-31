@@ -745,7 +745,7 @@ generate_api_config() {
     {
       "name": "api_monitor",
       "path": "$source_path",
-      "extensions": ["pdf", "jpg", "png", "doc", "docx", "m4a", "wav"],
+      "extensions": ["pdf", "m4a", "wav"],
       "tag": "$tag",
       "enabled": true
     }
@@ -877,8 +877,28 @@ install_api_setup() {
             fi
             ;;
         5)
-            printf "Enter custom path: "
-            read -r source_path
+            echo "Custom path options:"
+            echo "  a. Enter your own path"
+            echo "  b. Create folder under ~/Documents/deep-thought-trillian/"
+            printf "Choose [a]: "
+            read -r custom_choice
+            custom_choice="${custom_choice:-a}"
+            
+            if [[ "$custom_choice" == "b" ]]; then
+                printf "Folder name under ~/Documents/deep-thought-trillian/: "
+                read -r folder_name
+                if [[ -n "$folder_name" ]]; then
+                    source_path="~/Documents/deep-thought-trillian/$folder_name"
+                    # Create the directory
+                    mkdir -p "${source_path/#\~/$HOME}"
+                    echo "✓ Created directory: $source_path"
+                else
+                    source_path="~/Downloads"
+                fi
+            else
+                printf "Enter custom path: "
+                read -r source_path
+            fi
             ;;
         *) source_path="~/Downloads" ;;
     esac
@@ -892,7 +912,9 @@ install_api_setup() {
         echo "This may cause issues during monitoring."
     else
         local file_count=$(find "$source_path_expanded" -maxdepth 1 -type f \( -name "*.pdf" -o -name "*.jpg" -o -name "*.png" -o -name "*.doc" -o -name "*.docx" -o -name "*.m4a" -o -name "*.wav" \) 2>/dev/null | wc -l | tr -d ' ')
-        echo "✓ Found $file_count files that will be uploaded"
+        echo "✓ Found $file_count existing files in folder"
+        echo "ℹ️  IMPORTANT: Only NEW files added after installation will be uploaded"
+        echo "ℹ️  Existing $file_count files will NOT be uploaded (prevents duplicates)"
     fi
     
     # Generate configuration
@@ -973,9 +995,9 @@ install_local_setup() {
     esac
     
     # File types
-    printf "File types to monitor? [pdf,jpg,png,doc,docx]: "
+    printf "File types to monitor? [pdf,m4a,wav]: "
     read -r file_types
-    file_types="${file_types:-pdf,jpg,png,doc,docx}"
+    file_types="${file_types:-pdf,m4a,wav}"
     
     # Convert to JSON array
     local extensions_json

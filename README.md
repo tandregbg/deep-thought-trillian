@@ -25,6 +25,8 @@ chmod +x deep-thought-trillian.sh
 Enter: API endpoint, username, password, folder to monitor  
 Done! Files are now uploaded automatically.
 
+**⚠️ IMPORTANT**: Only NEW files added after installation will be uploaded. Existing files in the folder are NOT uploaded (prevents duplicates and API overload).
+
 ### Local File Organization
 ```bash
 ./deep-thought-trillian.sh --install-local
@@ -482,18 +484,22 @@ Planned improvements for future versions:
 - **Voice Memos Auto-Detection**: Automatically detects and suggests Voice Memos folder on macOS with file count
 - **API Connection Testing**: Tests API connectivity during setup process
 - **Intelligent Installation**: Automatically chooses cron method for Voice Memos to bypass macOS restrictions
+- **File Processing Clarification**: Clear warnings that only NEW files are processed (existing files are NOT uploaded)
+- **Enhanced Custom Path Options**: Added convenient folder creation under ~/Documents/deep-thought-trillian/
 
 #### Improvements
 - **Streamlined Script**: Moved verbose documentation from script to README for better maintainability
 - **Enhanced Help**: Updated help text to prominently feature new quick installation options
 - **Better Validation**: Validates directories and shows file counts during setup
 - **Clearer Feedback**: Provides immediate success confirmations and next steps
+- **Minimized Default Extensions**: Focused on audio (m4a, wav) and PDF files for streamlined workflows
 
 #### User Experience
 - **30-Second Setup**: Get up and running with either API upload or local organization in under 30 seconds
 - **Guided Prompts**: Clear, numbered options for folder selection
 - **Voice Memos Made Easy**: Seamless setup for macOS Voice Memos with automatic permission handling
 - **Immediate Functionality**: Services start automatically after installation
+- **Safe Installation**: Clear messaging prevents accidental upload of hundreds of existing files
 
 ### v1.1.0 (2024-11-24)
 **HTTP API Integration**
