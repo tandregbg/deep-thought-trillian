@@ -1058,7 +1058,7 @@ monitor_manual() {
     
     if [[ "${API_UPLOAD_ENABLED:-false}" == "true" ]]; then
         log "INFO" "API Upload: Enabled"
-        log "INFO" "API Endpoint: ${API_ENDPOINT:-not set}"
+        log "INFO" "API Endpoint: ${API_ENDPOINT:-https://api.deep-thought.cloud/api/v1/transcribe}"
         log "INFO" "API Username: ${API_USERNAME:-not set}"
         log "INFO" "Upload Mode: ${API_UPLOAD_MODE:-copy_and_upload}"
     else
@@ -1138,7 +1138,7 @@ start_monitoring() {
     
     if [[ "${API_UPLOAD_ENABLED:-false}" == "true" ]]; then
         log "INFO" "API Upload: Enabled"
-        log "INFO" "API Endpoint: ${API_ENDPOINT:-not set}"
+        log "INFO" "API Endpoint: ${API_ENDPOINT:-https://api.deep-thought.cloud/api/v1/transcribe}"
         log "INFO" "API Username: ${API_USERNAME:-not set}"
         log "INFO" "Upload Mode: ${API_UPLOAD_MODE:-copy_and_upload}"
     else
