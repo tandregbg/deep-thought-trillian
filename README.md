@@ -1,11 +1,13 @@
-# Deep Thought Trillian v1.0.0
+# Deep Thought Trillian v1.1.0
 
-A cross-platform file monitoring and organization system that automatically copies files from specified directories to a centralized destination with intelligent tagging and naming.
+A cross-platform file monitoring and organization system that automatically copies files from specified directories to a centralized destination with intelligent tagging and naming, plus HTTP API upload support for server integration.
 
 ## Features
 
 - **Real-time monitoring** using `fswatch` (macOS) or `inotify` (Linux)
 - **Smart organization** with customizable tags and file naming
+- **HTTP API upload** with Basic Authentication to Deep Thought server
+- **Flexible upload modes** (copy only, upload only, or both)
 - **Dual installation modes** (LaunchAgent/systemd + Cron/Screen)
 - **Flexible configuration** supporting any file types and directories
 - **Duplicate protection** with timestamp-based versioning
@@ -39,6 +41,14 @@ Configuration is stored in `~/.deep-thought-trillian/config.json`:
 ```json
 {
   "destination": "~/Dropbox/organized-files",
+  "api_upload": {
+    "enabled": false,
+    "endpoint": "http://localhost:8080/api/v1/transcribe",
+    "username": "",
+    "password": "",
+    "upload_mode": "copy_and_upload",
+    "timeout": 30
+  },
   "watch_directories": [
     {
       "name": "voice_memos",
@@ -76,6 +86,14 @@ DTT_REAL_TIME=true
 # Feature flags
 DTT_VOICE_MEMOS=true
 DTT_AUTO_CREATE_DIRS=true
+
+# API Upload Configuration
+DTT_API_UPLOAD_ENABLED=false
+DTT_API_ENDPOINT=http://localhost:8080/api/v1/transcribe
+DTT_API_USERNAME=
+DTT_API_PASSWORD=
+DTT_API_UPLOAD_MODE=copy_and_upload
+DTT_API_TIMEOUT=30
 ```
 
 ### Configuration Fields
@@ -87,6 +105,12 @@ DTT_AUTO_CREATE_DIRS=true
 | `extensions` | File extensions to monitor (without dots) | `["pdf", "jpg"]` |
 | `tag` | Prefix tag for copied files | `"download"` |
 | `enabled` | Whether to monitor this directory | `true`/`false` |
+| `api_upload.enabled` | Enable HTTP API upload | `true`/`false` |
+| `api_upload.endpoint` | API endpoint URL | `"http://server:8080/api/v1/transcribe"` |
+| `api_upload.username` | API username for Basic Auth | `"myuser"` |
+| `api_upload.password` | API password for Basic Auth | `"mypass"` |
+| `api_upload.upload_mode` | Upload behavior | `"copy_only"`, `"upload_only"`, `"copy_and_upload"` |
+| `api_upload.timeout` | API request timeout (seconds) | `30` |
 
 ## Commands
 
@@ -118,8 +142,27 @@ DTT_AUTO_CREATE_DIRS=true
 # Setup config files only (no service installation)
 ./deep-thought-trillian.sh --setup
 
-# Run with command-line arguments
+# Run with command-line arguments (local copy only)
 ./deep-thought-trillian.sh --monitor --source ~/Downloads --dest ~/organized --tag download --ext pdf,jpg,png
+
+# Run with API upload only (no local copy)
+./deep-thought-trillian.sh --monitor --source ~/Downloads --upload-mode upload_only \
+  --api-endpoint http://server:8080/api/v1/transcribe \
+  --api-username myuser --api-password mypass --tag download --ext pdf,jpg,png
+
+# Example with specific IP address and custom tag
+./deep-thought-trillian.sh --monitor \
+  --source test/ \
+  --upload-mode upload_only \
+  --api-endpoint http://192.168.11.125:8080/api/v1/transcribe \
+  --api-username test \
+  --api-password test123 \
+  --tag current-folder
+
+# Run with both local copy and API upload
+./deep-thought-trillian.sh --monitor --source ~/Downloads --dest ~/organized \
+  --api-upload --api-endpoint http://server:8080/api/v1/transcribe \
+  --api-username myuser --api-password mypass --tag download --ext pdf,jpg,png
 
 # Run with environment variables
 DTT_SOURCE_DIR=~/Downloads DTT_DEST_DIR=~/organized ./deep-thought-trillian.sh --monitor
@@ -152,6 +195,61 @@ Voice Memos requires special handling due to macOS security restrictions:
 ```bash
 ./deep-thought-trillian.sh --uninstall      # Remove standard service
 ./deep-thought-trillian.sh --install-cron   # Install cron version
+```
+
+## HTTP API Upload
+
+### Overview
+Deep Thought Trillian v1.1.0 introduces HTTP API upload functionality, allowing files to be automatically uploaded to a Deep Thought server for processing (e.g., transcription, analysis).
+
+### Upload Modes
+- **`copy_only`** - Only copy files locally (original behavior)
+- **`upload_only`** - Only upload to API, no local copy
+- **`copy_and_upload`** - Both copy locally and upload to API (default)
+
+### Authentication
+Uses HTTP Basic Authentication with username and password.
+
+### API Response
+The API should return JSON with optional `task_id` or `id` field for tracking:
+```json
+{
+  "task_id": "abc123",
+  "status": "queued",
+  "message": "File uploaded successfully"
+}
+```
+
+### Configuration Examples
+
+**Via JSON config:**
+```json
+{
+  "api_upload": {
+    "enabled": true,
+    "endpoint": "https://deepthought.example.com/api/v1/transcribe",
+    "username": "myuser",
+    "password": "mypass",
+    "upload_mode": "copy_and_upload",
+    "timeout": 30
+  }
+}
+```
+
+**Via environment variables:**
+```bash
+DTT_API_UPLOAD_ENABLED=true
+DTT_API_ENDPOINT=https://deepthought.example.com/api/v1/transcribe
+DTT_API_USERNAME=myuser
+DTT_API_PASSWORD=mypass
+DTT_API_UPLOAD_MODE=copy_and_upload
+```
+
+**Via command line:**
+```bash
+./deep-thought-trillian.sh --monitor --source ~/Downloads \
+  --api-upload --api-endpoint https://deepthought.example.com/api/v1/transcribe \
+  --api-username myuser --api-password mypass
 ```
 
 ## File Organization
@@ -190,6 +288,12 @@ sudo yum install jq inotify-tools
 2. Test manually: `./deep-thought-trillian.sh --monitor`
 3. Check logs: `tail -f ~/.deep-thought-trillian/deep-thought-trillian.log`
 
+**API Upload Issues:**
+- Check API endpoint URL and credentials
+- Verify server is accessible: `curl -u username:password http://server:8080/api/v1/transcribe`
+- Check timeout settings if uploads are slow
+- Review logs for HTTP error codes
+
 ### Log Analysis
 ```bash
 # View logs
@@ -200,6 +304,12 @@ tail -f ~/.deep-thought-trillian/cron-monitor.log
 
 # Search for errors
 grep ERROR ~/.deep-thought-trillian/deep-thought-trillian.log
+
+# Search for API upload activity
+grep "API upload" ~/.deep-thought-trillian/deep-thought-trillian.log
+
+# Search for upload failures
+grep "Upload failed" ~/.deep-thought-trillian/deep-thought-trillian.log
 ```
 
 ## Installation Methods Comparison
@@ -226,6 +336,7 @@ grep ERROR ~/.deep-thought-trillian/deep-thought-trillian.log
 - `jq` - JSON processor
 - `fswatch` (macOS) or `inotify-tools` (Linux)
 - `screen` (for cron installation)
+- `curl` - HTTP client (for API uploads)
 
 ## Uninstallation
 
@@ -292,6 +403,13 @@ This system evolved from a simple file organization script into a comprehensive 
 - Robust error handling and logging
 - Security-aware deployment options
 
+**Deep Thought Trillian v1.1.0 - HTTP API Integration:**
+- HTTP API upload with Basic Authentication
+- Flexible upload modes (copy only, upload only, both)
+- Server integration for automated processing
+- Enhanced configuration options
+- Improved error handling and logging
+
 ### Technical Implementation
 
 #### File System Monitoring
@@ -339,4 +457,4 @@ Planned improvements for future versions:
 
 ---
 
-**Deep Thought Trillian v1.0.0** - Keeping your files organized automatically!
+**Deep Thought Trillian v1.1.0** - Keeping your files organized automatically with HTTP API integration!

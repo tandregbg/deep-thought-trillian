@@ -1,15 +1,16 @@
 #!/bin/bash
 
 # Script: deep-thought-trillian.sh
-# Description: Advanced file monitoring and organization system
-# Version: 1.0.0
+# Description: Advanced file monitoring and organization system with API upload support
+# Version: 1.1.0
 # Supports: macOS and Ubuntu/Linux with LaunchAgent/systemd and cron variants
+# New: HTTP Basic Auth API upload functionality
 
 set -euo pipefail
 
 # Constants
 readonly SCRIPT_NAME="deep-thought-trillian"
-readonly VERSION="1.0.0"
+readonly VERSION="1.1.0"
 readonly CONFIG_DIR="$HOME/.deep-thought-trillian"
 readonly CONFIG_PATH="$CONFIG_DIR/config.json"
 readonly ENV_PATH="$CONFIG_DIR/.env"
@@ -146,6 +147,14 @@ generate_env() {
 # Feature flags
 # DTT_VOICE_MEMOS=true
 # DTT_AUTO_CREATE_DIRS=true
+
+# API Upload Configuration
+# DTT_API_UPLOAD_ENABLED=false
+# DTT_API_ENDPOINT=http://localhost:8080/api/v1/transcribe
+# DTT_API_USERNAME=
+# DTT_API_PASSWORD=
+# DTT_API_UPLOAD_MODE=copy_and_upload
+# DTT_API_TIMEOUT=30
 EOF
     
     log "INFO" "Generated default .env file at $ENV_PATH"
@@ -178,6 +187,26 @@ parse_arguments() {
             -p|--poll)
                 DTT_POLL_INTERVAL="$2"
                 shift 2
+                ;;
+            --api-endpoint)
+                DTT_API_ENDPOINT="$2"
+                shift 2
+                ;;
+            --api-username)
+                DTT_API_USERNAME="$2"
+                shift 2
+                ;;
+            --api-password)
+                DTT_API_PASSWORD="$2"
+                shift 2
+                ;;
+            --upload-mode)
+                DTT_API_UPLOAD_MODE="$2"
+                shift 2
+                ;;
+            --api-upload)
+                DTT_API_UPLOAD_ENABLED=true
+                shift
                 ;;
             --setup)
                 SETUP_ONLY=true
@@ -218,6 +247,11 @@ check_dependencies() {
     # Check for screen (required for cron mode)
     if ! command_exists screen; then
         missing_deps+=("screen")
+    fi
+    
+    # Check for curl (required for API uploads)
+    if ! command_exists curl; then
+        missing_deps+=("curl")
     fi
     
     # Check for OS-specific file watcher
@@ -282,6 +316,14 @@ generate_config() {
     cat > "$CONFIG_PATH" << 'EOF'
 {
   "destination": "~/Dropbox/organized-files",
+  "api_upload": {
+    "enabled": false,
+    "endpoint": "http://localhost:8080/api/v1/transcribe",
+    "username": "",
+    "password": "",
+    "upload_mode": "copy_and_upload",
+    "timeout": 30
+  },
   "watch_directories": [
     {
       "name": "voice_memos",
@@ -323,6 +365,149 @@ generate_config() {
 EOF
     
     log "INFO" "Generated default configuration at $CONFIG_PATH"
+}
+
+# Upload file to API using HTTP Basic Auth
+upload_file_to_api() {
+    local file="$1"
+    local tag="$2"
+    local api_endpoint="$3"
+    local username="$4"
+    local password="$5"
+    local timeout="${6:-30}"
+    
+    # Validate inputs
+    if [[ ! -f "$file" ]]; then
+        log "ERROR" "Upload failed: file does not exist: $file"
+        return 1
+    fi
+    
+    if [[ -z "$api_endpoint" || -z "$username" || -z "$password" ]]; then
+        log "ERROR" "Upload failed: missing API endpoint, username, or password"
+        return 1
+    fi
+    
+    local basename
+    basename=$(basename "$file")
+    
+    log "INFO" "Uploading file to API: $basename"
+    log "DEBUG" "API endpoint: $api_endpoint"
+    log "DEBUG" "Username: $username"
+    log "DEBUG" "Tag: $tag"
+    
+    # Create temporary response file
+    local response_file
+    response_file=$(mktemp)
+    
+    # Upload file using curl with HTTP Basic Auth
+    local curl_exit_code=0
+    local http_status
+    
+    http_status=$(curl -w "%{http_code}" \
+        -u "$username:$password" \
+        -X POST \
+        -F "file=@$file" \
+        -F "tag=$tag" \
+        --connect-timeout "$timeout" \
+        --max-time $((timeout * 2)) \
+        -s \
+        -o "$response_file" \
+        "$api_endpoint") || curl_exit_code=$?
+    
+    # Check curl exit code
+    if [[ $curl_exit_code -ne 0 ]]; then
+        log "ERROR" "Upload failed: curl error (exit code: $curl_exit_code) for file: $basename"
+        rm -f "$response_file"
+        return 1
+    fi
+    
+    # Check HTTP status code
+    if [[ "$http_status" -ge 200 && "$http_status" -lt 300 ]]; then
+        # Success - parse response for task ID if available
+        local task_id=""
+        if command_exists jq && [[ -s "$response_file" ]]; then
+            task_id=$(jq -r '.task_id // .id // empty' "$response_file" 2>/dev/null || echo "")
+        fi
+        
+        if [[ -n "$task_id" ]]; then
+            log "INFO" "Upload successful: $basename -> Task ID: $task_id"
+        else
+            log "INFO" "Upload successful: $basename (HTTP $http_status)"
+        fi
+        
+        # Log response for debugging
+        if [[ -s "$response_file" ]]; then
+            log "DEBUG" "API response: $(cat "$response_file")"
+        fi
+        
+        rm -f "$response_file"
+        return 0
+    else
+        # Error - log response
+        local error_msg="Unknown error"
+        if [[ -s "$response_file" ]]; then
+            if command_exists jq; then
+                error_msg=$(jq -r '.error // .message // empty' "$response_file" 2>/dev/null || cat "$response_file")
+            else
+                error_msg=$(cat "$response_file")
+            fi
+        fi
+        
+        log "ERROR" "Upload failed: $basename (HTTP $http_status) - $error_msg"
+        rm -f "$response_file"
+        return 1
+    fi
+}
+
+# Get API configuration from config file and environment
+get_api_config() {
+    local api_enabled="${DTT_API_UPLOAD_ENABLED:-false}"
+    local api_endpoint="${DTT_API_ENDPOINT:-}"
+    local api_username="${DTT_API_USERNAME:-}"
+    local api_password="${DTT_API_PASSWORD:-}"
+    local api_upload_mode="${DTT_API_UPLOAD_MODE:-copy_and_upload}"
+    local api_timeout="${DTT_API_TIMEOUT:-30}"
+    
+    # Override with config file values if available
+    if [[ -f "$CONFIG_PATH" ]] && command_exists jq; then
+        local config_enabled
+        config_enabled=$(jq -r '.api_upload.enabled // false' "$CONFIG_PATH" 2>/dev/null)
+        if [[ "$config_enabled" == "true" && "$api_enabled" != "true" ]]; then
+            api_enabled="true"
+        fi
+        
+        if [[ -z "$api_endpoint" ]]; then
+            api_endpoint=$(jq -r '.api_upload.endpoint // empty' "$CONFIG_PATH" 2>/dev/null)
+        fi
+        
+        if [[ -z "$api_username" ]]; then
+            api_username=$(jq -r '.api_upload.username // empty' "$CONFIG_PATH" 2>/dev/null)
+        fi
+        
+        if [[ -z "$api_password" ]]; then
+            api_password=$(jq -r '.api_upload.password // empty' "$CONFIG_PATH" 2>/dev/null)
+        fi
+        
+        if [[ "$api_upload_mode" == "copy_and_upload" ]]; then
+            local config_mode
+            config_mode=$(jq -r '.api_upload.upload_mode // "copy_and_upload"' "$CONFIG_PATH" 2>/dev/null)
+            api_upload_mode="$config_mode"
+        fi
+        
+        if [[ "$api_timeout" == "30" ]]; then
+            local config_timeout
+            config_timeout=$(jq -r '.api_upload.timeout // 30' "$CONFIG_PATH" 2>/dev/null)
+            api_timeout="$config_timeout"
+        fi
+    fi
+    
+    # Export for use in other functions
+    export API_UPLOAD_ENABLED="$api_enabled"
+    export API_ENDPOINT="$api_endpoint"
+    export API_USERNAME="$api_username"
+    export API_PASSWORD="$api_password"
+    export API_UPLOAD_MODE="$api_upload_mode"
+    export API_TIMEOUT="$api_timeout"
 }
 
 # Interactive configuration wizard
@@ -378,7 +563,58 @@ configure_interactive() {
     mv "$temp_config" "$CONFIG_PATH"
     
     echo
-    echo "Step 2: Installation Method"
+    echo "Step 2: API Upload Configuration (Optional)"
+    echo "------------------------------------------"
+    echo "Configure API upload to Deep Thought server?"
+    printf "Enable API upload? (y/n) [n]: "
+    read -r enable_api
+    
+    if [[ "$enable_api" =~ ^[Yy]$ ]]; then
+        echo
+        printf "API endpoint [http://localhost:8080/api/v1/transcribe]: "
+        read -r api_endpoint
+        api_endpoint="${api_endpoint:-http://localhost:8080/api/v1/transcribe}"
+        
+        printf "API username: "
+        read -r api_username
+        
+        printf "API password: "
+        read -rs api_password
+        echo
+        
+        echo "Upload modes:"
+        echo "1. copy_only - Only copy files locally (original behavior)"
+        echo "2. upload_only - Only upload to API, no local copy"
+        echo "3. copy_and_upload - Both copy locally and upload to API"
+        printf "Choose upload mode [3]: "
+        read -r mode_choice
+        
+        local upload_mode="copy_and_upload"
+        case "$mode_choice" in
+            1) upload_mode="copy_only" ;;
+            2) upload_mode="upload_only" ;;
+            3|"") upload_mode="copy_and_upload" ;;
+        esac
+        
+        # Update config with API settings
+        temp_config=$(mktemp)
+        jq --arg endpoint "$api_endpoint" \
+           --arg username "$api_username" \
+           --arg password "$api_password" \
+           --arg mode "$upload_mode" \
+           '.api_upload.enabled = true | 
+            .api_upload.endpoint = $endpoint | 
+            .api_upload.username = $username | 
+            .api_upload.password = $password | 
+            .api_upload.upload_mode = $mode' \
+           "$CONFIG_PATH" > "$temp_config"
+        mv "$temp_config" "$CONFIG_PATH"
+        
+        echo "[OK] API upload configured"
+    fi
+    
+    echo
+    echo "Step 3: Installation Method"
     echo "---------------------------"
     echo "Choose installation method:"
     echo "1. Standard (LaunchAgent/systemd) - Recommended for most directories"
@@ -389,7 +625,7 @@ configure_interactive() {
     method_choice="${method_choice:-1}"
     
     echo
-    echo "Step 3: Enable/Disable Watch Directories"
+    echo "Step 4: Enable/Disable Watch Directories"
     echo "----------------------------------------"
     echo "Review the configuration file at: $CONFIG_PATH"
     echo "Set 'enabled': true for directories you want to monitor"
@@ -459,6 +695,75 @@ process_file() {
         return 0  # Already processed
     fi
     
+    # Get API configuration
+    get_api_config
+    
+    local copy_success=true
+    local upload_success=true
+    local basename
+    basename=$(basename "$file")
+    
+    # Handle different upload modes
+    case "${API_UPLOAD_MODE:-copy_and_upload}" in
+        "copy_only")
+            # Original behavior - only copy locally
+            copy_success=$(copy_file_locally "$file" "$tag" "$destination")
+            ;;
+        "upload_only")
+            # Only upload to API
+            if [[ "${API_UPLOAD_ENABLED:-false}" == "true" ]]; then
+                if upload_file_to_api "$file" "$tag" "$API_ENDPOINT" "$API_USERNAME" "$API_PASSWORD" "$API_TIMEOUT"; then
+                    log "INFO" "API upload successful: $basename"
+                    upload_success=true
+                else
+                    log "ERROR" "API upload failed: $basename"
+                    upload_success=false
+                fi
+            else
+                log "WARN" "Upload mode is 'upload_only' but API upload is not enabled"
+                return 1
+            fi
+            ;;
+        "copy_and_upload")
+            # Both copy locally and upload to API
+            copy_success=$(copy_file_locally "$file" "$tag" "$destination")
+            
+            if [[ "${API_UPLOAD_ENABLED:-false}" == "true" ]]; then
+                if upload_file_to_api "$file" "$tag" "$API_ENDPOINT" "$API_USERNAME" "$API_PASSWORD" "$API_TIMEOUT"; then
+                    log "INFO" "API upload successful: $basename"
+                    upload_success=true
+                else
+                    log "WARN" "API upload failed: $basename (local copy still successful)"
+                    upload_success=false
+                fi
+            fi
+            ;;
+        *)
+            log "ERROR" "Unknown upload mode: ${API_UPLOAD_MODE:-copy_and_upload}"
+            return 1
+            ;;
+    esac
+    
+    # Update processed database if at least one operation succeeded
+    if [[ "$copy_success" == "true" || "$upload_success" == "true" ]]; then
+        mkdir -p "$(dirname "$PROCESSED_DB")"
+        if [[ -f "$PROCESSED_DB" ]]; then
+            sed -i.bak "/^$(echo "$file" | sed 's/[[\.*^$()+?{|]/\\&/g'):/d" "$PROCESSED_DB" 2>/dev/null || true
+        fi
+        echo "$file_entry" >> "$PROCESSED_DB"
+        return 0
+    else
+        log "ERROR" "All operations failed for file: $basename"
+        return 1
+    fi
+}
+
+# Copy file locally (original functionality)
+copy_file_locally() {
+    local file="$1"
+    local tag="$2"
+    local destination="$3"
+    
     # Create destination filename
     local basename
     basename=$(basename "$file")
@@ -477,16 +782,11 @@ process_file() {
     local dest_path="$destination/$dest_name"
     if cp "$file" "$dest_path"; then
         log "INFO" "Copied: $(basename "$file") -> $dest_name"
-        
-        # Update processed database
-        mkdir -p "$(dirname "$PROCESSED_DB")"
-        if [[ -f "$PROCESSED_DB" ]]; then
-            sed -i.bak "/^$(echo "$file" | sed 's/[[\.*^$()+?{|]/\\&/g'):/d" "$PROCESSED_DB" 2>/dev/null || true
-        fi
-        echo "$file_entry" >> "$PROCESSED_DB"
+        echo "true"
         return 0
     else
         log "ERROR" "Failed to copy: $file"
+        echo "false"
         return 1
     fi
 }
@@ -688,6 +988,8 @@ setup_config() {
     echo "  $0 --monitor"
     echo "Or with arguments:"
     echo "  $0 --monitor --source ~/Downloads --dest ~/organized --tag download --ext pdf,jpg"
+    echo "Or with API upload:"
+    echo "  $0 --monitor --api-upload --api-endpoint http://server:8080/api/v1/transcribe --api-username user --api-password pass"
 }
 
 # Monitor with manual arguments (no config files required)
@@ -695,14 +997,31 @@ monitor_manual() {
     local source_dir="${DTT_SOURCE_DIR:-}"
     local dest_dir="${DTT_DEST_DIR:-}"
     local file_tag="${DTT_FILE_TAG:-manual}"
-    local extensions="${DTT_EXTENSIONS:-pdf,jpg,png,doc,docx}"
+    local extensions="${DTT_EXTENSIONS:-pdf,jpg,png,doc,docx,mp3,m4a}"
     local poll_interval="${DTT_POLL_INTERVAL:-5}"
     
-    # Validate required parameters
-    if [[ -z "$source_dir" || -z "$dest_dir" ]]; then
-        log "ERROR" "Manual mode requires source and destination directories"
-        echo "Usage: $0 --monitor --source <dir> --dest <dir> [--tag <tag>] [--ext <extensions>]"
+    # Get API configuration first
+    get_api_config
+    
+    # Auto-enable API upload if upload_only mode is specified
+    if [[ "${API_UPLOAD_MODE:-copy_and_upload}" == "upload_only" ]]; then
+        export API_UPLOAD_ENABLED="true"
+        export DTT_API_UPLOAD_ENABLED="true"
+    fi
+    
+    if [[ -z "$source_dir" ]]; then
+        log "ERROR" "Manual mode requires source directory"
+        echo "Usage: $0 --monitor --source <dir> [--dest <dir>] [--tag <tag>] [--ext <extensions>]"
         echo "Or set environment variables: DTT_SOURCE_DIR, DTT_DEST_DIR"
+        echo "API upload options: --api-upload --api-endpoint <url> --api-username <user> --api-password <pass>"
+        exit 1
+    fi
+    
+    # Check destination requirement based on upload mode
+    if [[ "${API_UPLOAD_MODE:-copy_and_upload}" != "upload_only" && -z "$dest_dir" ]]; then
+        log "ERROR" "Destination directory required for copy_only and copy_and_upload modes"
+        echo "Usage: $0 --monitor --source <dir> --dest <dir> [--tag <tag>] [--ext <extensions>]"
+        echo "Or use --upload-mode upload_only to skip local copying"
         exit 1
     fi
     
@@ -716,8 +1035,8 @@ monitor_manual() {
         exit 1
     fi
     
-    # Create destination directory if it doesn't exist
-    if [[ ! -d "$dest_dir" ]]; then
+    # Create destination directory if it doesn't exist (only for modes that need it)
+    if [[ "${API_UPLOAD_MODE:-copy_and_upload}" != "upload_only" && ! -d "$dest_dir" ]]; then
         if [[ "${DTT_AUTO_CREATE_DIRS:-true}" == "true" ]]; then
             mkdir -p "$dest_dir"
             log "INFO" "Created destination directory: $dest_dir"
@@ -727,6 +1046,9 @@ monitor_manual() {
         fi
     fi
     
+    # Get API configuration
+    get_api_config
+    
     log "INFO" "Starting Deep Thought Trillian v$VERSION (Manual Mode)"
     log "INFO" "Source: $source_dir"
     log "INFO" "Destination: $dest_dir"
@@ -734,11 +1056,20 @@ monitor_manual() {
     log "INFO" "Extensions: $extensions"
     log "INFO" "Poll interval: ${poll_interval}s"
     
+    if [[ "${API_UPLOAD_ENABLED:-false}" == "true" ]]; then
+        log "INFO" "API Upload: Enabled"
+        log "INFO" "API Endpoint: ${API_ENDPOINT:-not set}"
+        log "INFO" "API Username: ${API_USERNAME:-not set}"
+        log "INFO" "Upload Mode: ${API_UPLOAD_MODE:-copy_and_upload}"
+    else
+        log "INFO" "API Upload: Disabled"
+    fi
+    
     # Convert extensions to array
     IFS=',' read -ra ext_array <<< "$extensions"
     
     # Store PID
-    echo $ > "$PID_FILE"
+    echo $$ > "$PID_FILE"
     
     # Set up signal handlers
     trap 'log "INFO" "Shutting down..."; rm -f "$PID_FILE"; exit 0' SIGTERM SIGINT
@@ -763,8 +1094,8 @@ start_monitoring() {
     # Parse command-line arguments first
     parse_arguments "$@"
     
-    # Check if we have manual mode parameters
-    if [[ -n "${DTT_SOURCE_DIR:-}" && -n "${DTT_DEST_DIR:-}" ]]; then
+    # Check if we have manual mode parameters (source dir is required, dest dir depends on upload mode)
+    if [[ -n "${DTT_SOURCE_DIR:-}" ]]; then
         monitor_manual
         return
     fi
@@ -773,7 +1104,7 @@ start_monitoring() {
     load_env
     
     # Check again after loading .env
-    if [[ -n "${DTT_SOURCE_DIR:-}" && -n "${DTT_DEST_DIR:-}" ]]; then
+    if [[ -n "${DTT_SOURCE_DIR:-}" ]]; then
         monitor_manual
         return
     fi
@@ -798,9 +1129,21 @@ start_monitoring() {
         log "INFO" "Using destination from DTT_DEST_DIR: $destination"
     fi
     
+    # Get API configuration
+    get_api_config
+    
     log "INFO" "Starting Deep Thought Trillian v$VERSION"
     log "INFO" "Destination: $destination"
     log "INFO" "OS: $OS_TYPE"
+    
+    if [[ "${API_UPLOAD_ENABLED:-false}" == "true" ]]; then
+        log "INFO" "API Upload: Enabled"
+        log "INFO" "API Endpoint: ${API_ENDPOINT:-not set}"
+        log "INFO" "API Username: ${API_USERNAME:-not set}"
+        log "INFO" "Upload Mode: ${API_UPLOAD_MODE:-copy_and_upload}"
+    else
+        log "INFO" "API Upload: Disabled"
+    fi
     
     # Create processed files database
     mkdir -p "$(dirname "$PROCESSED_DB")"
@@ -1078,13 +1421,15 @@ install_cron_service() {
     echo "[OK] Cron job checks every minute for screen session"
     echo "[OK] Screen session runs the monitoring in background"
     echo "[OK] Bypasses macOS security restrictions for Voice Memos"
+    echo "[OK] API upload functionality available"
     echo
     echo "Next steps:"
     echo "1. Edit configuration: $CONFIG_PATH"
     echo "2. Enable directories you want to monitor"
-    echo "3. Check status: $0 --status-cron"
-    echo "4. View logs: tail -f $LOG_FILE"
-    echo "5. View cron logs: tail -f $CRON_LOG"
+    echo "3. Configure API upload if desired"
+    echo "4. Check status: $0 --status-cron"
+    echo "5. View logs: tail -f $LOG_FILE"
+    echo "6. View cron logs: tail -f $CRON_LOG"
 }
 
 # Uninstall
@@ -1157,6 +1502,22 @@ show_cron_status() {
     local destination
     destination=$(jq -r '.destination' "$CONFIG_PATH" 2>/dev/null || echo "Invalid config")
     echo "  Destination: $destination"
+    
+    # Show API configuration
+    local api_enabled
+    api_enabled=$(jq -r '.api_upload.enabled // false' "$CONFIG_PATH" 2>/dev/null)
+    if [[ "$api_enabled" == "true" ]]; then
+        local api_endpoint api_username api_mode
+        api_endpoint=$(jq -r '.api_upload.endpoint // "not set"' "$CONFIG_PATH" 2>/dev/null)
+        api_username=$(jq -r '.api_upload.username // "not set"' "$CONFIG_PATH" 2>/dev/null)
+        api_mode=$(jq -r '.api_upload.upload_mode // "copy_and_upload"' "$CONFIG_PATH" 2>/dev/null)
+        echo "  API Upload: Enabled"
+        echo "  API Endpoint: $api_endpoint"
+        echo "  API Username: $api_username"
+        echo "  Upload Mode: $api_mode"
+    else
+        echo "  API Upload: Disabled"
+    fi
     echo
     
     echo "Watch Directories:"
@@ -1213,6 +1574,22 @@ show_status() {
     local destination
     destination=$(jq -r '.destination' "$CONFIG_PATH" 2>/dev/null || echo "Invalid config")
     echo "  Destination: $destination"
+    
+    # Show API configuration
+    local api_enabled
+    api_enabled=$(jq -r '.api_upload.enabled // false' "$CONFIG_PATH" 2>/dev/null)
+    if [[ "$api_enabled" == "true" ]]; then
+        local api_endpoint api_username api_mode
+        api_endpoint=$(jq -r '.api_upload.endpoint // "not set"' "$CONFIG_PATH" 2>/dev/null)
+        api_username=$(jq -r '.api_upload.username // "not set"' "$CONFIG_PATH" 2>/dev/null)
+        api_mode=$(jq -r '.api_upload.upload_mode // "copy_and_upload"' "$CONFIG_PATH" 2>/dev/null)
+        echo "  API Upload: Enabled"
+        echo "  API Endpoint: $api_endpoint"
+        echo "  API Username: $api_username"
+        echo "  Upload Mode: $api_mode"
+    else
+        echo "  API Upload: Disabled"
+    fi
     echo
     
     echo "Watch Directories:"
@@ -1319,7 +1696,8 @@ install_complete() {
         "linux")
             echo "Linux Setup:"
             echo "- Service installed and started automatically"
-            echo "- Check status with: systemctl --user status deep-thought-trillian"
+            echo "- Check status with: systemctl --
+user status deep-thought-trillian"
             echo
             ;;
     esac
@@ -1329,8 +1707,9 @@ install_complete() {
     echo "Next steps:"
     echo "1. Edit configuration: $CONFIG_PATH"
     echo "2. Enable directories you want to monitor"
-    echo "3. Check status: $0 --status"
-    echo "4. View logs: tail -f $LOG_FILE"
+    echo "3. Configure API upload if desired"
+    echo "4. Check status: $0 --status"
+    echo "5. View logs: tail -f $LOG_FILE"
 }
 
 # Stop monitoring
@@ -1386,7 +1765,7 @@ stop_cron_monitoring() {
 # Show help
 show_help() {
     cat << EOF
-Deep Thought Trillian v$VERSION - Automatic File Organization
+Deep Thought Trillian v$VERSION - Automatic File Organization with API Upload
 
 USAGE:
     $0 [COMMAND]
@@ -1414,6 +1793,13 @@ MANUAL MONITORING OPTIONS:
     -l, --log-level     Log level (DEBUG, INFO, WARN, ERROR)
     -p, --poll <sec>    Polling interval in seconds (default: 5)
 
+API UPLOAD OPTIONS:
+    --api-endpoint <url>    API endpoint URL
+    --api-username <user>   API username
+    --api-password <pass>   API password
+    --upload-mode <mode>    Upload mode: copy_only, upload_only, copy_and_upload
+    --api-upload            Enable API upload (shorthand)
+
 CRON SERVICE COMMANDS:
     --status-cron       Show cron service status
     --start-cron        Start screen session for monitoring
@@ -1434,14 +1820,36 @@ INSTALLATION METHODS:
        - Required for Voice Memos and restricted directories
        - Bypasses macOS security restrictions
 
+UPLOAD MODES:
+    copy_only           Only copy files locally (original behavior)
+    upload_only         Only upload to API, no local copy
+    copy_and_upload     Both copy locally and upload to API (default)
+
 EXAMPLES:
     $0 --install            # Standard installation
     $0 --install-cron       # Cron installation (for Voice Memos)
     $0 --configure          # Set up configuration
     $0 --setup              # Create config files only
     $0 --monitor            # Run with config files
+    
+    # Manual monitoring with local copy only
     $0 --monitor --source ~/Downloads --dest ~/organized --tag download --ext pdf,jpg
-    DTT_SOURCE_DIR=~/Downloads DTT_DEST_DIR=~/organized $0 --monitor
+    
+    # Manual monitoring with API upload only
+    $0 --monitor --source ~/Downloads --upload-mode upload_only \\
+       --api-endpoint http://server:8080/api/v1/transcribe \\
+       --api-username myuser --api-password mypass --tag download --ext pdf,jpg
+    
+    # Manual monitoring with both local copy and API upload
+    $0 --monitor --source ~/Downloads --dest ~/organized \\
+       --api-upload --api-endpoint http://server:8080/api/v1/transcribe \\
+       --api-username myuser --api-password mypass --tag download --ext pdf,jpg
+    
+    # Using environment variables
+    DTT_SOURCE_DIR=~/Downloads DTT_DEST_DIR=~/organized \\
+    DTT_API_UPLOAD_ENABLED=true DTT_API_ENDPOINT=http://server:8080/api/v1/transcribe \\
+    DTT_API_USERNAME=myuser DTT_API_PASSWORD=mypass $0 --monitor
+    
     $0 --status             # Check standard service status
     $0 --status-cron        # Check cron service status
 
@@ -1450,6 +1858,13 @@ FILES:
     Log:         $LOG_FILE
     Cron Log:    $CRON_LOG
     PID:         $PID_FILE
+
+API AUTHENTICATION:
+    The script uses HTTP Basic Authentication to upload files to the Deep Thought API.
+    Configure credentials via:
+    - Command line: --api-username <user> --api-password <pass>
+    - Environment: DTT_API_USERNAME=<user> DTT_API_PASSWORD=<pass>
+    - Config file: Edit api_upload section in $CONFIG_PATH
 
 For more information, see the README.md file.
 EOF
@@ -1471,7 +1886,8 @@ main() {
             setup_config
             ;;
         --monitor)
-            start_monitoring
+            shift
+            start_monitoring "$@"
             ;;
         --status)
             show_status
