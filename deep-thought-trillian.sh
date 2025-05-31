@@ -655,6 +655,9 @@ validate_config() {
         return 1
     fi
     
+    # Load API configuration to check upload mode
+    get_api_config
+    
     local destination
     destination=$(jq -r '.destination' "$CONFIG_PATH")
     
@@ -663,12 +666,8 @@ validate_config() {
         return 1
     fi
     
-    # Check if this is upload-only mode
-    local upload_mode
-    upload_mode=$(jq -r '.api_upload.upload_mode // "copy_and_upload"' "$CONFIG_PATH" 2>/dev/null)
-    
     # Skip destination validation for upload-only mode
-    if [[ "$upload_mode" == "upload_only" ]]; then
+    if [[ "${API_UPLOAD_MODE:-copy_and_upload}" == "upload_only" ]]; then
         log "DEBUG" "Upload-only mode detected, skipping destination validation"
         return 0
     fi
@@ -866,6 +865,10 @@ install_api_setup() {
                 use_cron=true
                 echo "✓ Selected Voice Memos folder"
                 echo "⚠ Voice Memos requires special permissions on macOS"
+                echo "📋 IMPORTANT: Grant permissions to this script:"
+                echo "   1. System Preferences > Security & Privacy > Privacy"
+                echo "   2. Add this script to 'Full Disk Access'"
+                echo "   3. Script location: $(realpath "$0")"
                 echo "✓ Will use cron installation method for Voice Memos access"
             else
                 source_path="~/Desktop"
