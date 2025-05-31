@@ -43,7 +43,7 @@ Configuration is stored in `~/.deep-thought-trillian/config.json`:
   "destination": "~/Dropbox/organized-files",
   "api_upload": {
     "enabled": false,
-    "endpoint": "http://localhost:8080/api/v1/transcribe",
+    "endpoint": "https://api.deep-thought.cloud/api/v1/transcribe",
     "username": "",
     "password": "",
     "upload_mode": "copy_and_upload",
@@ -89,7 +89,7 @@ DTT_AUTO_CREATE_DIRS=true
 
 # API Upload Configuration
 DTT_API_UPLOAD_ENABLED=false
-DTT_API_ENDPOINT=http://localhost:8080/api/v1/transcribe
+DTT_API_ENDPOINT=https://api.deep-thought.cloud/api/v1/transcribe
 DTT_API_USERNAME=
 DTT_API_PASSWORD=
 DTT_API_UPLOAD_MODE=copy_and_upload

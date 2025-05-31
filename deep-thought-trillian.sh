@@ -150,7 +150,7 @@ generate_env() {
 
 # API Upload Configuration
 # DTT_API_UPLOAD_ENABLED=false
-# DTT_API_ENDPOINT=http://localhost:8080/api/v1/transcribe
+# DTT_API_ENDPOINT=https://api.deep-thought.cloud/api/v1/transcribe
 # DTT_API_USERNAME=
 # DTT_API_PASSWORD=
 # DTT_API_UPLOAD_MODE=copy_and_upload
@@ -318,7 +318,7 @@ generate_config() {
   "destination": "~/Dropbox/organized-files",
   "api_upload": {
     "enabled": false,
-    "endpoint": "http://localhost:8080/api/v1/transcribe",
+    "endpoint": "https://api.deep-thought.cloud/api/v1/transcribe",
     "username": "",
     "password": "",
     "upload_mode": "copy_and_upload",
@@ -571,9 +571,9 @@ configure_interactive() {
     
     if [[ "$enable_api" =~ ^[Yy]$ ]]; then
         echo
-        printf "API endpoint [http://localhost:8080/api/v1/transcribe]: "
+        printf "API endpoint [https://api.deep-thought.cloud/api/v1/transcribe]: "
         read -r api_endpoint
-        api_endpoint="${api_endpoint:-http://localhost:8080/api/v1/transcribe}"
+        api_endpoint="${api_endpoint:-https://api.deep-thought.cloud/api/v1/transcribe}"
         
         printf "API username: "
         read -r api_username
@@ -1759,6 +1759,97 @@ stop_cron_monitoring() {
         echo "Stopped screen session (PID: $pid)"
     else
         echo "No screen session running"
+    fi
+}
+
+# Upload file to Deep Thought API
+upload_to_api() {
+    local file_path="$1"
+    local tag="$2"
+    local api_url="${DTT_API_URL:-http://155.4.75.114:8080}"
+    local username="${DTT_API_USERNAME:-}"
+    local password="${DTT_API_PASSWORD:-}"
+    
+    # Validate required parameters
+    if [[ -z "$file_path" ]]; then
+        log "ERROR" "File path is required for upload"
+        return 1
+    fi
+    
+    if [[ ! -f "$file_path" ]]; then
+        log "ERROR" "File does not exist: $file_path"
+        return 1
+    fi
+    
+    if [[ -z "$username" || -z "$password" ]]; then
+        log "ERROR" "API credentials required. Set DTT_API_USERNAME and DTT_API_PASSWORD"
+        return 1
+    fi
+    
+    log "INFO" "Uploading file to Deep Thought API: $(basename "$file_path")"
+    log "INFO" "API URL: $api_url"
+    log "INFO" "Username: $username"
+    
+    # Prepare upload parameters
+    local upload_params=(
+        -X POST
+        -u "$username:$password"
+        -F "file=@$file_path"
+        -F "language=auto"
+        -F "use_kb_whisper=true"
+        -F "priority=normal"
+    )
+    
+    # Add tag to filename if provided
+    if [[ -n "$tag" ]]; then
+        local basename=$(basename "$file_path")
+        local name="${basename%.*}"
+        local ext="${basename##*.}"
+        local tagged_name="[${tag}]_${name}.${ext}"
+        upload_params+=(-F "original_filename=$tagged_name")
+        log "INFO" "Tagged filename: $tagged_name"
+    fi
+    
+    # Perform upload
+    local response
+    local http_code
+    
+    response=$(curl -s -w "\n%{http_code}" "${upload_params[@]}" "$api_url/api/v1/transcribe")
+    http_code=$(echo "$response" | tail -n1)
+    response_body=$(echo "$response" | head -n -1)
+    
+    log "INFO" "HTTP Response Code: $http_code"
+    log "INFO" "Response Body: $response_body"
+    
+    if [[ "$http_code" =~ ^(200|202)$ ]]; then
+        log "INFO" "Upload successful"
+        
+        # Parse response for task_id or cache_key
+        if command -v jq >/dev/null 2>&1; then
+            local task_id=$(echo "$response_body" | jq -r '.task_id // empty')
+            local cache_key=$(echo "$response_body" | jq -r '.result.cache_key // empty')
+            local status=$(echo "$response_body" | jq -r '.status // empty')
+            
+            if [[ -n "$task_id" ]]; then
+                log "INFO" "Task ID: $task_id"
+            fi
+            
+            if [[ -n "$cache_key" ]]; then
+                log "INFO" "Cache Key: $cache_key"
+            fi
+            
+            if [[ "$status" == "completed" ]]; then
+                log "INFO" "File was already cached - transcription available immediately"
+            elif [[ "$status" == "queued" ]]; then
+                log "INFO" "File queued for transcription"
+            fi
+        fi
+        
+        return 0
+    else
+        log "ERROR" "Upload failed with HTTP code: $http_code"
+        log "ERROR" "Response: $response_body"
+        return 1
     fi
 }
 
